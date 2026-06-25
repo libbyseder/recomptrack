@@ -8,41 +8,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Inter', system_ui, sans-serif; }
+        body { font-family: 'Inter', system-ui, sans-serif; }
         .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
         .metric-card { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .metric-card:hover { transform: translateY(-2px); }
         .progress-bar { transition: width 0.4s ease; }
         .time-btn { padding: 4px 12px; font-size: 12px; border-radius: 9999px; transition: all 0.2s; }
         .time-btn.active { background-color: #10b981; color: white; font-weight: 600; }
-        
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 340px;
-            background-color: #18181b;
-            color: #e4e4e7;
-            text-align: left;
-            border-radius: 8px;
-            padding: 14px;
-            position: absolute;
-            z-index: 10;
-            bottom: 130%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-            line-height: 1.5;
-            border: 1px solid #3f3f46;
-        }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -109,13 +81,7 @@
 
                 <!-- FFMI -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-                    <div class="flex items-center gap-x-2 mb-1">
-                        <div class="text-sky-400 text-xs font-semibold">FFMI</div>
-                        <div class="tooltip">
-                            <i class="fa-solid fa-info-circle text-sky-400 text-xs cursor-help"></i>
-                            <span class="tooltiptext" id="ffmi-tooltip"></span>
-                        </div>
-                    </div>
+                    <div class="text-sky-400 text-xs font-semibold mb-1">FFMI</div>
                     <div id="dash-ffmi" class="text-5xl font-semibold tabular-nums">—</div>
                     <div class="mt-3">
                         <div class="flex justify-between text-[10px] text-zinc-400 mb-1">
@@ -154,18 +120,12 @@
             <div class="lg:col-span-3 bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div class="font-semibold">Trends</div>
-                    
-                    <!-- Time Navigation -->
-                    <div class="flex items-center gap-x-2">
-                        <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">← Prev</button>
-                        <div class="flex flex-wrap gap-1 text-xs">
-                            <button onclick="filterChart('week')" id="btn-week" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Week</button>
-                            <button onclick="filterChart('month')" id="btn-month" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full active">Month</button>
-                            <button onclick="filterChart('quarter')" id="btn-quarter" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Quarter</button>
-                            <button onclick="filterChart('year')" id="btn-year" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Year</button>
-                            <button onclick="filterChart('all')" id="btn-all" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">All</button>
-                        </div>
-                        <button onclick="shiftPeriod(1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">Next →</button>
+                    <div class="flex flex-wrap gap-1 text-xs">
+                        <button onclick="filterChart('week')" id="btn-week" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Week</button>
+                        <button onclick="filterChart('month')" id="btn-month" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full active">Month</button>
+                        <button onclick="filterChart('quarter')" id="btn-quarter" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Quarter</button>
+                        <button onclick="filterChart('year')" id="btn-year" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Year</button>
+                        <button onclick="filterChart('all')" id="btn-all" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">All</button>
                     </div>
                 </div>
                 <div class="h-72"><canvas id="trend-chart"></canvas></div>
@@ -182,7 +142,7 @@
         </div>
     </div>
 
-    <!-- Profile & Goals Modal -->
+    <!-- Enhanced Profile & Goals Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
             <div class="flex justify-between items-center mb-6">
@@ -190,6 +150,7 @@
                 <button onclick="hideProfileModal()" class="text-xl">×</button>
             </div>
 
+            <!-- Profile Section -->
             <div class="mb-6">
                 <div class="text-sm font-semibold text-zinc-400 mb-3">PROFILE</div>
                 <div class="grid grid-cols-2 gap-4">
@@ -198,19 +159,13 @@
                         <input type="number" id="profile-height" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
                     </div>
                     <div>
-                        <label class="text-xs text-zinc-400">Gender</label>
-                        <select id="profile-gender" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                            <option value="female">Female</option>
-                            <option value="male">Male</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2">
                         <label class="text-xs text-zinc-400">Name (optional)</label>
                         <input type="text" id="profile-name" placeholder="Your name" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
                     </div>
                 </div>
             </div>
 
+            <!-- Goals Section -->
             <div>
                 <div class="text-sm font-semibold text-zinc-400 mb-3">GOALS</div>
                 <div class="space-y-4">
@@ -237,11 +192,10 @@
 
     <script>
         let logs = [];
-        let profile = { heightInches: 63.5, name: '', gender: 'female' };
+        let profile = { heightInches: 63.5, name: '' };
         let goals = { targetWeight: 130, targetBF: 22, targetFFMI: 17.5 };
         let chartInstance = null;
         let currentFilter = 'month';
-        let currentOffset = 0; // For shifting time periods
 
         function loadData() {
             logs = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
@@ -265,45 +219,6 @@
             const m = inchesToCm(profile.heightInches) / 100;
             const lean = kg * (1 - bf / 100);
             return lean / (m * m);
-        }
-
-        function getFFMICategories(gender) {
-            if (gender === 'male') {
-                return [
-                    { range: "< 17", label: "Poor / Below Average" },
-                    { range: "17 – 19", label: "Average" },
-                    { range: "19 – 21", label: "Good / Athletic" },
-                    { range: "21 – 23", label: "Advanced" },
-                    { range: "23+", label: "Elite (Natural)" }
-                ];
-            } else {
-                return [
-                    { range: "13 – 14.5", label: "Developing" },
-                    { range: "15 – 16.5", label: "Average" },
-                    { range: "17 – 18", label: "Athletic / Good" },
-                    { range: "18.5 – 20", label: "Advanced" },
-                    { range: "20+", label: "Elite (rare naturally)" }
-                ];
-            }
-        }
-
-        function updateFFMITooltip() {
-            const tooltip = document.getElementById('ffmi-tooltip');
-            if (!tooltip) return;
-
-            const categories = getFFMICategories(profile.gender || 'female');
-            let html = `
-                <strong>FFMI Formula</strong><br>
-                FFMI = Lean Mass (kg) ÷ Height² (m)<br><br>
-                <strong>Lean Mass</strong> = Weight × (1 − Body Fat %)<br><br>
-                <strong>FFMI Categories (${profile.gender === 'male' ? 'Men' : 'Women'})</strong><br>
-            `;
-
-            categories.forEach(cat => {
-                html += `• <strong>${cat.range}</strong> → ${cat.label}<br>`;
-            });
-
-            tooltip.innerHTML = html;
         }
 
         function updateDashboard() {
@@ -330,58 +245,27 @@
         }
 
         function updateProgressBars(latest) {
+            // Weight progress (assuming lower or higher depending on goal)
             const weightProgress = goals.targetWeight 
                 ? Math.min(100, Math.max(0, ((latest.weight - (goals.targetWeight - 20)) / 20) * 100))
                 : 50;
             document.getElementById('weight-progress-bar').style.width = weightProgress + '%';
             document.getElementById('weight-progress-text').textContent = weightProgress.toFixed(0) + '%';
 
+            // BF% progress (lower is better)
             const bfProgress = goals.targetBF 
                 ? Math.min(100, Math.max(0, ((30 - latest.bf) / (30 - goals.targetBF)) * 100))
                 : 50;
             document.getElementById('bf-progress-bar').style.width = bfProgress + '%';
             document.getElementById('bf-progress-text').textContent = bfProgress.toFixed(0) + '%';
 
+            // FFMI progress
             const ffmi = calculateFFMI(latest.weight, latest.bf) || 0;
             const ffmiProgress = goals.targetFFMI 
                 ? Math.min(100, Math.max(0, ((ffmi - 14) / (goals.targetFFMI - 14)) * 100))
                 : 50;
             document.getElementById('ffmi-progress-bar').style.width = ffmiProgress + '%';
             document.getElementById('ffmi-progress-text').textContent = ffmiProgress.toFixed(0) + '%';
-        }
-
-        function getFilteredLogs(period, offset = 0) {
-            if (!logs.length) return [];
-            const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
-            const today = new Date();
-            let start = new Date(today);
-            let end = new Date(today);
-
-            switch(period) {
-                case 'week':
-                    start.setDate(today.getDate() - 7 - (offset * 7));
-                    end.setDate(today.getDate() - (offset * 7));
-                    break;
-                case 'month':
-                    start.setMonth(today.getMonth() - 1 - offset);
-                    end.setMonth(today.getMonth() - offset);
-                    break;
-                case 'quarter':
-                    start.setMonth(today.getMonth() - 3 - (offset * 3));
-                    end.setMonth(today.getMonth() - (offset * 3));
-                    break;
-                case 'year':
-                    start.setFullYear(today.getFullYear() - 1 - offset);
-                    end.setFullYear(today.getFullYear() - offset);
-                    break;
-                case 'all':
-                default:
-                    return sorted;
-            }
-
-            const startStr = start.toISOString().split('T')[0];
-            const endStr = end.toISOString().split('T')[0];
-            return sorted.filter(log => log.date >= startStr && log.date <= endStr);
         }
 
         function updateChart(period = currentFilter) {
@@ -394,7 +278,7 @@
             if (!ctx) return;
             if (chartInstance) chartInstance.destroy();
 
-            let filteredLogs = getFilteredLogs(period, currentOffset);
+            let filteredLogs = getFilteredLogs(period);
             if (filteredLogs.length === 0) {
                 ctx.style.display = 'none';
                 return;
@@ -431,41 +315,25 @@
             });
         }
 
-        function shiftPeriod(direction) {
-            currentOffset += direction;
-            if (currentOffset < 0) currentOffset = 0;
-            updateChart(currentFilter);
+        function getFilteredLogs(period) {
+            if (!logs.length) return [];
+            const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
+            const today = new Date();
+            let cutoff = new Date(today);
+
+            switch(period) {
+                case 'week': cutoff.setDate(today.getDate() - 7); break;
+                case 'month': cutoff.setMonth(today.getMonth() - 1); break;
+                case 'quarter': cutoff.setMonth(today.getMonth() - 3); break;
+                case 'year': cutoff.setFullYear(today.getFullYear() - 1); break;
+                case 'all': default: return sorted;
+            }
+            const cutoffStr = cutoff.toISOString().split('T')[0];
+            return sorted.filter(log => log.date >= cutoffStr);
         }
 
         function filterChart(period) {
-            currentOffset = 0;
             updateChart(period);
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-list');
-            container.innerHTML = '';
-
-            if (logs.length === 0) {
-                container.innerHTML = '<p class="text-zinc-400 py-4">No measurements logged yet.</p>';
-                return;
-            }
-
-            const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
-
-            sorted.forEach(log => {
-                const ffmi = calculateFFMI(log.weight, log.bf);
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center py-3 border-b border-zinc-800 text-sm';
-                div.innerHTML = `
-                    <div class="font-medium">${log.date}</div>
-                    <div class="font-mono text-right">
-                        ${log.weight} lbs &nbsp;•&nbsp; ${parseFloat(log.bf).toFixed(2)}% &nbsp;•&nbsp; 
-                        <span class="text-sky-400">FFMI ${ffmi ? ffmi.toFixed(2) : '—'}</span>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
         }
 
         function quickLog() {
@@ -479,7 +347,6 @@
             saveData();
             updateDashboard();
             updateChart(currentFilter);
-            renderHistory();
         }
 
         function importWithingsCSV() {
@@ -527,7 +394,6 @@
                 saveData();
                 updateDashboard();
                 updateChart(currentFilter);
-                renderHistory();
                 alert(`Imported ${added} measurements!`);
             } else {
                 alert('No new valid measurements found.');
@@ -537,7 +403,6 @@
         function showProfileModal() {
             document.getElementById('profile-height').value = profile.heightInches || 63.5;
             document.getElementById('profile-name').value = profile.name || '';
-            document.getElementById('profile-gender').value = profile.gender || 'female';
             document.getElementById('goal-weight').value = goals.targetWeight || '';
             document.getElementById('goal-bf').value = goals.targetBF || '';
             document.getElementById('goal-ffmi').value = goals.targetFFMI || '';
@@ -553,7 +418,6 @@
         function saveProfileAndGoals() {
             profile.heightInches = parseFloat(document.getElementById('profile-height').value) || 63.5;
             profile.name = document.getElementById('profile-name').value || '';
-            profile.gender = document.getElementById('profile-gender').value || 'female';
             
             goals.targetWeight = parseFloat(document.getElementById('goal-weight').value) || null;
             goals.targetBF = parseFloat(document.getElementById('goal-bf').value) || null;
@@ -561,27 +425,7 @@
 
             saveData();
             hideProfileModal();
-            updateFFMITooltip();
             updateDashboard();
-        }
-
-        function updateFFMITooltip() {
-            const tooltip = document.getElementById('ffmi-tooltip');
-            if (!tooltip) return;
-
-            const categories = getFFMICategories(profile.gender || 'female');
-            let html = `
-                <strong>FFMI Formula</strong><br>
-                FFMI = Lean Mass (kg) ÷ Height² (m)<br><br>
-                <strong>Lean Mass</strong> = Weight × (1 − Body Fat %)<br><br>
-                <strong>FFMI Categories (${profile.gender === 'male' ? 'Men' : 'Women'})</strong><br>
-            `;
-
-            categories.forEach(cat => {
-                html += `• <strong>${cat.range}</strong> → ${cat.label}<br>`;
-            });
-
-            tooltip.innerHTML = html;
         }
 
         function clearData() {
@@ -593,16 +437,10 @@
 
         function init() {
             loadData();
-
-            if (!profile.gender) profile.gender = 'female';
-
             const dateInput = document.getElementById('quick-date');
             if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
             updateDashboard();
-            updateFFMITooltip();
-            renderHistory();
-
             setTimeout(() => {
                 updateChart('month');
             }, 150);
