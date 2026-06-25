@@ -31,6 +31,35 @@
             box-shadow: 0 0 0 2px #27272a;
             z-index: 10;
         }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 320px;
+            background-color: #18181b;
+            color: #e4e4e7;
+            text-align: left;
+            border-radius: 8px;
+            padding: 14px;
+            position: absolute;
+            z-index: 50;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            font-size: 12px;
+            line-height: 1.5;
+            border: 1px solid #3f3f46;
+            white-space: pre-line;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
