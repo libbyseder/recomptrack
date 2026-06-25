@@ -265,15 +265,19 @@
                     <div class="text-sm font-semibold text-zinc-400 mb-3">Goals</div>
                     <div class="grid grid-cols-3 gap-3">
                         <div>
-                            <label class="text-xs text-zinc-400 block mb-1">Target Weight (lbs)</label>
+                            <div class="flex items-center gap-x-1 mb-1 h-4">
+                                <label class="text-xs text-zinc-400">Target Weight (lbs)</label>
+                            </div>
                             <input type="number" id="goal-weight" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
                         </div>
                         <div>
-                            <label class="text-xs text-zinc-400 block mb-1">Target Body Fat %</label>
+                            <div class="flex items-center gap-x-1 mb-1 h-4">
+                                <label class="text-xs text-zinc-400">Target Body Fat %</label>
+                            </div>
                             <input type="number" id="goal-bf" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
                         </div>
                         <div>
-                            <div class="flex items-center gap-x-1 mb-1">
+                            <div class="flex items-center gap-x-1 mb-1 h-4">
                                 <label class="text-xs text-zinc-400">Target FFMI</label>
                                 <div class="tooltip">
                                     <i class="fa-solid fa-info-circle text-sky-400 text-xs cursor-help"></i>
@@ -412,6 +416,12 @@
             const tooltip = document.getElementById('ffmi-profile-tooltip');
             if (!tooltip) return;
             const gender = document.getElementById('profile-gender').value;
+            
+            if (!gender) {
+                tooltip.innerHTML = `<strong>FFMI Categories</strong><br><br>Select a gender above to view the relevant categories for men or women.`;
+                return;
+            }
+            
             const categories = getFFMICategories(gender);
             let html = `<strong>FFMI Categories</strong><br>`;
             categories.forEach(cat => {
