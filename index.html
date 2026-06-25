@@ -172,7 +172,6 @@
             <div class="flex items-center justify-between mb-2">
                 <div class="font-semibold">Trends</div>
                 
-                <!-- Time Navigation -->
                 <div class="flex items-center gap-x-2">
                     <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full flex items-center gap-x-1">
                         <i class="fa-solid fa-chevron-left"></i>
@@ -194,7 +193,6 @@
                 </div>
             </div>
 
-            <!-- Period Label -->
             <div id="chart-period-label" class="text-xs text-zinc-400 mb-3 font-medium tracking-wide">
                 This Month
             </div>
@@ -360,7 +358,6 @@
         let chartInstance = null;
         let currentFilter = 'month';
         let currentOffset = 0;
-        let currentPeriodLabel = 'This Month';
 
         let advancedSettings = {
             showWeight: true,
@@ -499,18 +496,23 @@
                 case 'month':
                     const monthDate = new Date(today.getFullYear(), today.getMonth() - offset, 1);
                     const monthName = monthDate.toLocaleString('default', { month: 'long' });
-                    const year = monthDate.getFullYear();
-                    if (offset === 0) label = `${monthName} ${year}`;
-                    else label = `${monthName} ${year}`;
+                    label = `${monthName} ${monthDate.getFullYear()}`;
                     break;
                 case 'quarter':
-                    const quarterDate = new Date(today.getFullYear(), today.getMonth() - (offset * 3), 1);
-                    const quarter = Math.floor(quarterDate.getMonth() / 3) + 1;
-                    label = offset === 0 ? 'This Quarter' : `Q${quarter} ${quarterDate.getFullYear()}`;
+                    let qYear = today.getFullYear();
+                    let qNum = Math.floor(today.getMonth() / 3) + 1;
+                    
+                    // Go back offset quarters
+                    qNum -= offset;
+                    while (qNum < 1) {
+                        qNum += 4;
+                        qYear--;
+                    }
+                    label = `Q${qNum} ${qYear}`;
                     break;
                 case 'year':
                     const yearDate = new Date(today.getFullYear() - offset, 0, 1);
-                    label = offset === 0 ? 'This Year' : `${yearDate.getFullYear()}`;
+                    label = `${yearDate.getFullYear()}`;
                     break;
                 case 'all':
                     label = 'All Time';
@@ -525,10 +527,8 @@
             const activeBtn = document.getElementById('btn-' + period);
             if (activeBtn) activeBtn.classList.add('active', 'bg-emerald-500', 'text-white');
 
-            // Update period label
-            currentPeriodLabel = getPeriodLabel(period, currentOffset);
             const labelEl = document.getElementById('chart-period-label');
-            if (labelEl) labelEl.textContent = currentPeriodLabel;
+            if (labelEl) labelEl.textContent = getPeriodLabel(period, currentOffset);
 
             const ctx = document.getElementById('trend-chart');
             if (!ctx) return;
@@ -614,12 +614,8 @@
                     plugins: {
                         legend: { 
                             display: true, 
-                            position: 'bottom',           // Moved legend below chart
-                            labels: { 
-                                boxWidth: 12, 
-                                font: { size: 11 }, 
-                                padding: 20 
-                            } 
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 11 }, padding: 20 } 
                         },
                         tooltip: {
                             callbacks: {
@@ -637,26 +633,42 @@
             if (!logs.length) return [];
             const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
             const today = new Date();
-            let start = new Date(today);
-            let end = new Date(today);
+            let start, end;
 
             switch(period) {
                 case 'week':
+                    start = new Date(today);
                     start.setDate(today.getDate() - 7 - (offset * 7));
+                    end = new Date(today);
                     end.setDate(today.getDate() - (offset * 7));
                     break;
+                    
                 case 'month':
-                    start.setMonth(today.getMonth() - 1 - offset);
-                    end.setMonth(today.getMonth() - offset);
+                    start = new Date(today.getFullYear(), today.getMonth() - 1 - offset, 1);
+                    end = new Date(today.getFullYear(), today.getMonth() - offset, 0);
                     break;
+                    
                 case 'quarter':
-                    start.setMonth(today.getMonth() - 3 - (offset * 3));
-                    end.setMonth(today.getMonth() - (offset * 3));
+                    // Calculate target quarter
+                    let currentQ = Math.floor(today.getMonth() / 3);
+                    let targetQ = currentQ - offset;
+                    let targetYear = today.getFullYear();
+                    
+                    while (targetQ < 0) {
+                        targetQ += 4;
+                        targetYear--;
+                    }
+                    
+                    const startMonth = targetQ * 3;
+                    start = new Date(targetYear, startMonth, 1);
+                    end = new Date(targetYear, startMonth + 3, 0);
                     break;
+                    
                 case 'year':
-                    start.setFullYear(today.getFullYear() - 1 - offset);
-                    end.setFullYear(today.getFullYear() - offset);
+                    start = new Date(today.getFullYear() - offset, 0, 1);
+                    end = new Date(today.getFullYear() - offset, 11, 31);
                     break;
+                    
                 case 'all':
                 default:
                     return sorted;
