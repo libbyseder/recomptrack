@@ -556,7 +556,21 @@
         }
 
         function updateDashboard() {
-            if (logs.length === 0) return;
+            if (logs.length === 0) {
+                // Clear dashboard when switching to a user with no data
+                document.getElementById('dash-weight').textContent = '—';
+                document.getElementById('dash-bf').textContent = '—';
+                document.getElementById('dash-ffmi').textContent = '—';
+                document.getElementById('dash-lean').textContent = '—';
+                document.getElementById('weight-to-goal').textContent = '';
+                document.getElementById('bf-to-goal').textContent = '';
+                document.getElementById('ffmi-to-goal').textContent = '';
+                document.getElementById('weight-goal-bar').style.width = '0%';
+                document.getElementById('bf-goal-bar').style.width = '0%';
+                document.getElementById('ffmi-goal-bar').style.width = '0%';
+                return;
+            }
+            
             const latest = [...logs].sort((a, b) => b.date.localeCompare(a.date))[0];
             
             document.getElementById('dash-weight').textContent = latest.weight;
