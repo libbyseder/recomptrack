@@ -105,7 +105,9 @@
                         <button onclick="shiftPeriod(1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">Next →</button>
                     </div>
                 </div>
-                <div class="h-72"><canvas id="trend-chart"></canvas></div>
+                <div class="h-80">
+                    <canvas id="trend-chart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -131,9 +133,13 @@
                     <span>Show Weight Goal Line</span>
                     <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
                 </div>
-                <div class="pt-4 border-t border-zinc-700">
-                    <div class="text-sm font-medium mb-2">Weight Goal (lbs)</div>
-                    <input type="number" id="weight-goal-value" value="125" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-2 text-sm">
+                <div class="flex items-center justify-between">
+                    <span>Show Body Fat Goal Line</span>
+                    <input type="checkbox" id="show-bf-goal" checked class="w-5 h-5 accent-emerald-500">
+                </div>
+                <div class="flex items-center justify-between">
+                    <span>Show FFMI Goal Line</span>
+                    <input type="checkbox" id="show-ffmi-goal" checked class="w-5 h-5 accent-emerald-500">
                 </div>
             </div>
             <button onclick="applyAdvancedSettings()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
@@ -152,7 +158,8 @@
 
         let advancedSettings = {
             showWeightGoal: true,
-            weightGoal: 125
+            showBFGoal: true,
+            showFFMIGoal: true
         };
 
         function loadData() {
@@ -209,24 +216,75 @@
                 ctx.style.display = 'block';
             }
 
-            const labels = filtered.map(l => '');
+            // Keep dates for tooltips but hide on axis
+            const labels = filtered.map(l => l.date);
             const weights = filtered.map(l => l.weight);
             const bfs = filtered.map(l => parseFloat(l.bf));
+            const ffmis = filtered.map(l => calculateFFMI(l.weight, l.bf) || null);
 
             const datasets = [
-                { label: 'Weight (lbs)', data: weights, borderColor: '#10b981', borderWidth: 3, tension: 0.3, yAxisID: 'y' },
-                { label: 'Body Fat %', data: bfs, borderColor: '#f59e0b', borderWidth: 2.5, tension: 0.3, yAxisID: 'y1' }
+                {
+                    label: 'Weight (lbs)',
+                    data: weights,
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Body Fat %',
+                    data: bfs,
+                    borderColor: '#f59e0b',
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'FFMI',
+                    data: ffmis,
+                    borderColor: '#38bdf8',
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y2'
+                }
             ];
 
-            if (advancedSettings.showWeightGoal && advancedSettings.weightGoal) {
+            // Add Goal Lines
+            if (advancedSettings.showWeightGoal && goals.targetWeight) {
                 datasets.push({
                     label: 'Weight Goal',
-                    data: new Array(weights.length).fill(advancedSettings.weightGoal),
+                    data: new Array(weights.length).fill(goals.targetWeight),
                     borderColor: '#ef4444',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     tension: 0,
                     yAxisID: 'y',
+                    pointRadius: 0
+                });
+            }
+
+            if (advancedSettings.showBFGoal && goals.targetBF) {
+                datasets.push({
+                    label: 'BF% Goal',
+                    data: new Array(bfs.length).fill(goals.targetBF),
+                    borderColor: '#f97316',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0,
+                    yAxisID: 'y1',
+                    pointRadius: 0
+                });
+            }
+
+            if (advancedSettings.showFFMIGoal && goals.targetFFMI) {
+                datasets.push({
+                    label: 'FFMI Goal',
+                    data: new Array(ffmis.length).fill(goals.targetFFMI),
+                    borderColor: '#a855f7',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0,
+                    yAxisID: 'y2',
                     pointRadius: 0
                 });
             }
@@ -237,12 +295,26 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { ticks: { display: false }, grid: { color: '#27272a' } },
+                        x: {
+                            grid: { color: '#27272a' },
+                            ticks: { display: false } // Hide dates on axis
+                        },
                         y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 11 } } },
-                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } }
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } },
+                        y2: { display: false }
                     },
-                    plugins: { legend: { display: true, position: 'top' } }
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label; // Show date in tooltip title
+                                }
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -309,7 +381,6 @@
             renderHistory();
         }
 
-        // ==================== FIXED CSV IMPORT ====================
         function importWithingsCSV() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -328,23 +399,14 @@
 
         function parseWithingsCSVFixed(csvText) {
             const lines = csvText.trim().split(/\r?\n/);
-            if (lines.length < 2) {
-                alert('CSV appears empty.');
-                return;
-            }
-
+            if (lines.length < 2) return alert('CSV appears empty');
             const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
             
-            // Find columns more flexibly
             let dateIdx = header.findIndex(h => h.includes('date'));
             let weightIdx = header.findIndex(h => h.includes('weight'));
             let fatMassIdx = header.findIndex(h => h.includes('fat mass'));
-            let muscleIdx = header.findIndex(h => h.includes('muscle mass'));
 
-            if (dateIdx === -1 || weightIdx === -1) {
-                alert('Could not find Date and Weight columns in your CSV.');
-                return;
-            }
+            if (dateIdx === -1 || weightIdx === -1) return alert('Could not find Date and Weight columns');
 
             let added = 0;
             const existing = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
@@ -355,40 +417,33 @@
                 const weight = parseFloat(values[weightIdx]);
                 let bf = null;
 
-                // Calculate body fat % from fat mass if available
                 if (fatMassIdx !== -1 && weight) {
                     const fatMass = parseFloat(values[fatMassIdx]);
-                    if (!isNaN(fatMass)) {
-                        bf = (fatMass / weight) * 100;
-                    }
+                    if (!isNaN(fatMass)) bf = (fatMass / weight) * 100;
                 }
 
                 if (!date || isNaN(weight) || bf === null) continue;
-
                 const formattedDate = new Date(date).toISOString().split('T')[0];
 
                 if (!existing.find(l => l.date === formattedDate)) {
-                    existing.push({
-                        date: formattedDate,
-                        weight: weight,
-                        bf: parseFloat(bf.toFixed(2))
-                    });
+                    existing.push({ date: formattedDate, weight, bf: parseFloat(bf.toFixed(2)) });
                     added++;
                 }
             }
 
             if (added > 0) {
                 localStorage.setItem('recomptrack_logs', JSON.stringify(existing));
-                alert(`Successfully imported ${added} new measurements!`);
-                location.reload(); // Refresh to show new data
+                alert(`Imported ${added} measurements!`);
+                location.reload();
             } else {
-                alert('No new valid measurements found. Data may already exist or columns are not recognized.');
+                alert('No new valid measurements found.');
             }
         }
 
         function showAdvancedSettings() {
             document.getElementById('show-weight-goal').checked = advancedSettings.showWeightGoal;
-            document.getElementById('weight-goal-value').value = advancedSettings.weightGoal || 125;
+            document.getElementById('show-bf-goal').checked = advancedSettings.showBFGoal;
+            document.getElementById('show-ffmi-goal').checked = advancedSettings.showFFMIGoal;
             document.getElementById('advanced-modal').classList.remove('hidden');
             document.getElementById('advanced-modal').classList.add('flex');
         }
@@ -400,15 +455,12 @@
 
         function applyAdvancedSettings() {
             advancedSettings.showWeightGoal = document.getElementById('show-weight-goal').checked;
-            advancedSettings.weightGoal = parseFloat(document.getElementById('weight-goal-value').value) || 125;
+            advancedSettings.showBFGoal = document.getElementById('show-bf-goal').checked;
+            advancedSettings.showFFMIGoal = document.getElementById('show-ffmi-goal').checked;
             saveData();
             hideAdvancedSettings();
             updateChart(currentFilter);
         }
-
-        function showProfileModal() { /* simplified for now */ alert('Profile modal would open here'); }
-        function hideProfileModal() {}
-        function saveProfileAndGoals() {}
 
         function clearData() {
             if (confirm('Clear all data?')) {
@@ -421,13 +473,9 @@
             loadData();
             const dateInput = document.getElementById('quick-date');
             if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
-
             updateDashboard();
             renderHistory();
-
-            setTimeout(() => {
-                updateChart('month');
-            }, 100);
+            setTimeout(() => updateChart('month'), 100);
         }
 
         window.onload = init;
