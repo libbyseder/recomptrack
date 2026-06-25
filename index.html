@@ -121,59 +121,6 @@
         </div>
     </div>
 
-    <!-- Profile & Goals Modal (FULLY RESTORED) -->
-    <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
-        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
-            <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Profile & Goals</div>
-                <button onclick="hideProfileModal()" class="text-xl">×</button>
-            </div>
-
-            <div class="mb-6">
-                <div class="text-sm font-semibold text-zinc-400 mb-3">PROFILE</div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs text-zinc-400">Height (inches)</label>
-                        <input type="number" id="profile-height" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs text-zinc-400">Gender</label>
-                        <select id="profile-gender" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                            <option value="female">Female</option>
-                            <option value="male">Male</option>
-                        </select>
-                    </div>
-                    <div class="col-span-2">
-                        <label class="text-xs text-zinc-400">Name (optional)</label>
-                        <input type="text" id="profile-name" placeholder="Your name" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="text-sm font-semibold text-zinc-400 mb-3">GOALS</div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-zinc-400">Target Weight (lbs)</label>
-                        <input type="number" id="goal-weight" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs text-zinc-400">Target Body Fat %</label>
-                        <input type="number" id="goal-bf" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                    </div>
-                    <div>
-                        <label class="text-xs text-zinc-400">Target FFMI</label>
-                        <input type="number" id="goal-ffmi" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 mt-1">
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="saveProfileAndGoals()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
-                Save Profile & Goals
-            </button>
-        </div>
-    </div>
-
     <!-- Advanced Settings Modal -->
     <div id="advanced-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-sm mx-4 p-7">
@@ -275,11 +222,33 @@
             const ffmis = filtered.map(l => calculateFFMI(l.weight, l.bf) || null);
 
             const datasets = [
-                { label: 'Weight (lbs)', data: weights, borderColor: '#10b981', borderWidth: 3, tension: 0.3, yAxisID: 'y' },
-                { label: 'Body Fat %', data: bfs, borderColor: '#f59e0b', borderWidth: 2.5, tension: 0.3, yAxisID: 'y1' },
-                { label: 'FFMI', data: ffmis, borderColor: '#38bdf8', borderWidth: 2.5, tension: 0.3, yAxisID: 'y2' }
+                {
+                    label: 'Weight (lbs)',
+                    data: weights,
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Body Fat %',
+                    data: bfs,
+                    borderColor: '#f59e0b',
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                },
+                {
+                    label: 'FFMI',
+                    data: ffmis,
+                    borderColor: '#38bdf8',           // Same blue as before
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y2'
+                }
             ];
 
+            // Weight Goal Line (Red)
             if (advancedSettings.showWeightGoal && goals.targetWeight) {
                 datasets.push({
                     label: 'Weight Goal',
@@ -293,6 +262,7 @@
                 });
             }
 
+            // BF% Goal Line (Orange)
             if (advancedSettings.showBFGoal && goals.targetBF) {
                 datasets.push({
                     label: 'BF% Goal',
@@ -306,11 +276,12 @@
                 });
             }
 
+            // FFMI Goal Line - FIXED: Same blue color as FFMI data
             if (advancedSettings.showFFMIGoal && goals.targetFFMI) {
                 datasets.push({
                     label: 'FFMI Goal',
                     data: new Array(ffmis.length).fill(goals.targetFFMI),
-                    borderColor: '#a855f7',
+                    borderColor: '#38bdf8',           // Same blue as FFMI line
                     borderWidth: 2,
                     borderDash: [5, 5],
                     tension: 0,
@@ -327,10 +298,26 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { grid: { color: '#27272a' }, ticks: { display: false } },
-                        y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 11 } } },
-                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } },
-                        y2: { display: false }
+                        x: {
+                            grid: { color: '#27272a' },
+                            ticks: { display: false }
+                        },
+                        y: { 
+                            position: 'left', 
+                            grid: { color: '#27272a' }, 
+                            ticks: { color: '#71717a', font: { size: 11 } } 
+                        },
+                        y1: { 
+                            position: 'right', 
+                            grid: { drawOnChartArea: false }, 
+                            ticks: { color: '#71717a', font: { size: 11 } } 
+                        },
+                        y2: { 
+                            display: true,                    // Show FFMI axis so scale makes sense
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#38bdf8', font: { size: 11 } }
+                        }
                     },
                     plugins: {
                         legend: { display: true, position: 'top' },
@@ -465,37 +452,6 @@
             } else {
                 alert('No new valid measurements found.');
             }
-        }
-
-        // ==================== PROFILE MODAL (FULLY RESTORED) ====================
-        function showProfileModal() {
-            document.getElementById('profile-height').value = profile.heightInches || 63.5;
-            document.getElementById('profile-name').value = profile.name || '';
-            document.getElementById('profile-gender').value = profile.gender || 'female';
-            document.getElementById('goal-weight').value = goals.targetWeight || '';
-            document.getElementById('goal-bf').value = goals.targetBF || '';
-            document.getElementById('goal-ffmi').value = goals.targetFFMI || '';
-            document.getElementById('profile-modal').classList.remove('hidden');
-            document.getElementById('profile-modal').classList.add('flex');
-        }
-
-        function hideProfileModal() {
-            document.getElementById('profile-modal').classList.add('hidden');
-            document.getElementById('profile-modal').classList.remove('flex');
-        }
-
-        function saveProfileAndGoals() {
-            profile.heightInches = parseFloat(document.getElementById('profile-height').value) || 63.5;
-            profile.name = document.getElementById('profile-name').value || '';
-            profile.gender = document.getElementById('profile-gender').value || 'female';
-            
-            goals.targetWeight = parseFloat(document.getElementById('goal-weight').value) || null;
-            goals.targetBF = parseFloat(document.getElementById('goal-bf').value) || null;
-            goals.targetFFMI = parseFloat(document.getElementById('goal-ffmi').value) || null;
-
-            saveData();
-            hideProfileModal();
-            updateDashboard();
         }
 
         function showAdvancedSettings() {
