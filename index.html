@@ -12,6 +12,22 @@
         .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
         .metric-card { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .metric-card:hover { transform: translateY(-2px); }
+        .goal-bar {
+            height: 4px;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e);
+            border-radius: 9999px;
+            position: relative;
+        }
+        .goal-bar::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px #27272a;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -48,20 +64,74 @@
             <h1 class="font-display text-4xl font-semibold tracking-tighter mb-6">Dashboard</h1>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+                
+                <!-- Weight Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-                    <div class="text-emerald-400 text-xs font-semibold mb-1">WEIGHT</div>
-                    <div id="dash-weight" class="text-5xl font-semibold tabular-nums">—</div>
-                    <div class="text-xs text-zinc-500">lbs</div>
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="text-emerald-400 text-xs font-semibold">WEIGHT</div>
+                            <div id="dash-weight" class="text-5xl font-semibold tabular-nums">—</div>
+                            <div class="text-xs text-zinc-500">lbs</div>
+                        </div>
+                        <div id="weight-goal-text" class="text-right text-xs text-zinc-400"></div>
+                    </div>
+                    
+                    <!-- Goal Progress Visual -->
+                    <div class="mt-3">
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="text-zinc-400">Goal Progress</span>
+                            <span id="weight-to-goal" class="font-medium text-emerald-400"></span>
+                        </div>
+                        <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                            <div id="weight-goal-bar" class="h-1.5 goal-bar transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Body Fat Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-                    <div class="text-orange-400 text-xs font-semibold mb-1">BODY FAT</div>
-                    <div id="dash-bf" class="text-5xl font-semibold tabular-nums">—</div>
-                    <div class="text-xs text-zinc-500">%</div>
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="text-orange-400 text-xs font-semibold">BODY FAT</div>
+                            <div id="dash-bf" class="text-5xl font-semibold tabular-nums">—</div>
+                            <div class="text-xs text-zinc-500">%</div>
+                        </div>
+                        <div id="bf-goal-text" class="text-right text-xs text-zinc-400"></div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="text-zinc-400">Goal Progress</span>
+                            <span id="bf-to-goal" class="font-medium text-orange-400"></span>
+                        </div>
+                        <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                            <div id="bf-goal-bar" class="h-1.5 goal-bar transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- FFMI Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-                    <div class="text-sky-400 text-xs font-semibold mb-1">FFMI</div>
-                    <div id="dash-ffmi" class="text-5xl font-semibold tabular-nums">—</div>
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="text-sky-400 text-xs font-semibold">FFMI</div>
+                            <div id="dash-ffmi" class="text-5xl font-semibold tabular-nums">—</div>
+                        </div>
+                        <div id="ffmi-goal-text" class="text-right text-xs text-zinc-400"></div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span class="text-zinc-400">Goal Progress</span>
+                            <span id="ffmi-to-goal" class="font-medium text-sky-400"></span>
+                        </div>
+                        <div class="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                            <div id="ffmi-goal-bar" class="h-1.5 goal-bar transition-all" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Lean Mass Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="text-teal-400 text-xs font-semibold mb-1">LEAN MASS</div>
                     <div id="dash-lean" class="text-5xl font-semibold tabular-nums">—</div>
@@ -214,12 +284,51 @@
         function updateDashboard() {
             if (logs.length === 0) return;
             const latest = [...logs].sort((a, b) => b.date.localeCompare(a.date))[0];
+            
             document.getElementById('dash-weight').textContent = latest.weight;
             document.getElementById('dash-bf').textContent = parseFloat(latest.bf).toFixed(2);
             const ffmi = calculateFFMI(latest.weight, latest.bf);
             document.getElementById('dash-ffmi').textContent = ffmi ? ffmi.toFixed(2) : '—';
             const lean = latest.weight * (1 - latest.bf / 100);
             document.getElementById('dash-lean').textContent = lean.toFixed(1);
+
+            updateGoalIndicators(latest);
+        }
+
+        function updateGoalIndicators(latest) {
+            // Weight Goal Progress
+            if (goals.targetWeight) {
+                const weightDiff = Math.abs(latest.weight - goals.targetWeight);
+                const weightProgress = Math.min(100, Math.max(0, ((30 - weightDiff) / 30) * 100));
+                document.getElementById('weight-goal-bar').style.width = weightProgress + '%';
+                document.getElementById('weight-to-goal').textContent = weightProgress.toFixed(0) + '% to goal';
+            } else {
+                document.getElementById('weight-to-goal').textContent = '';
+                document.getElementById('weight-goal-bar').style.width = '0%';
+            }
+
+            // Body Fat Goal Progress (lower is better)
+            if (goals.targetBF) {
+                const bfDiff = Math.abs(latest.bf - goals.targetBF);
+                const bfProgress = Math.min(100, Math.max(0, ((10 - bfDiff) / 10) * 100));
+                document.getElementById('bf-goal-bar').style.width = bfProgress + '%';
+                document.getElementById('bf-to-goal').textContent = bfProgress.toFixed(0) + '% to goal';
+            } else {
+                document.getElementById('bf-to-goal').textContent = '';
+                document.getElementById('bf-goal-bar').style.width = '0%';
+            }
+
+            // FFMI Goal Progress
+            const ffmi = calculateFFMI(latest.weight, latest.bf);
+            if (goals.targetFFMI && ffmi) {
+                const ffmiDiff = Math.abs(ffmi - goals.targetFFMI);
+                const ffmiProgress = Math.min(100, Math.max(0, ((5 - ffmiDiff) / 5) * 100));
+                document.getElementById('ffmi-goal-bar').style.width = ffmiProgress + '%';
+                document.getElementById('ffmi-to-goal').textContent = ffmiProgress.toFixed(0) + '% to goal';
+            } else {
+                document.getElementById('ffmi-to-goal').textContent = '';
+                document.getElementById('ffmi-goal-bar').style.width = '0%';
+            }
         }
 
         function updateChart(period = currentFilter) {
@@ -328,24 +437,21 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: {
-                            grid: { color: '#27272a' },
-                            ticks: { display: false }
-                        },
+                        x: { grid: { color: '#27272a' }, ticks: { display: false } },
                         y: { 
-                            display: advancedSettings.showWeight,           // Toggle y-axis with Weight
+                            display: advancedSettings.showWeight,
                             position: 'left', 
                             grid: { color: '#27272a' }, 
                             ticks: { color: '#10b981', font: { size: 11 } }
                         },
                         y1: { 
-                            display: advancedSettings.showBF,             // Toggle y1-axis with Body Fat %
+                            display: advancedSettings.showBF,
                             position: 'right', 
                             grid: { drawOnChartArea: false }, 
                             ticks: { color: '#f59e0b', font: { size: 11 } }
                         },
                         y2: { 
-                            display: advancedSettings.showFFMI,           // Toggle y2-axis with FFMI
+                            display: advancedSettings.showFFMI,
                             position: 'right', 
                             grid: { drawOnChartArea: false }, 
                             ticks: { color: '#38bdf8', font: { size: 11 } }
@@ -484,6 +590,36 @@
             } else {
                 alert('No new valid measurements found.');
             }
+        }
+
+        function showProfileModal() {
+            document.getElementById('profile-height').value = profile.heightInches || 63.5;
+            document.getElementById('profile-name').value = profile.name || '';
+            document.getElementById('profile-gender').value = profile.gender || 'female';
+            document.getElementById('goal-weight').value = goals.targetWeight || '';
+            document.getElementById('goal-bf').value = goals.targetBF || '';
+            document.getElementById('goal-ffmi').value = goals.targetFFMI || '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+            document.getElementById('profile-modal').classList.add('flex');
+        }
+
+        function hideProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+            document.getElementById('profile-modal').classList.remove('flex');
+        }
+
+        function saveProfileAndGoals() {
+            profile.heightInches = parseFloat(document.getElementById('profile-height').value) || 63.5;
+            profile.name = document.getElementById('profile-name').value || '';
+            profile.gender = document.getElementById('profile-gender').value || 'female';
+            
+            goals.targetWeight = parseFloat(document.getElementById('goal-weight').value) || null;
+            goals.targetBF = parseFloat(document.getElementById('goal-bf').value) || null;
+            goals.targetFFMI = parseFloat(document.getElementById('goal-ffmi').value) || null;
+
+            saveData();
+            hideProfileModal();
+            updateDashboard();
         }
 
         function showAdvancedSettings() {
