@@ -333,20 +333,22 @@
                             ticks: { display: false }
                         },
                         y: { 
+                            display: advancedSettings.showWeight,           // Toggle y-axis with Weight
                             position: 'left', 
                             grid: { color: '#27272a' }, 
-                            ticks: { color: '#10b981', font: { size: 11 } }   // Green for Weight
+                            ticks: { color: '#10b981', font: { size: 11 } }
                         },
                         y1: { 
+                            display: advancedSettings.showBF,             // Toggle y1-axis with Body Fat %
                             position: 'right', 
                             grid: { drawOnChartArea: false }, 
-                            ticks: { color: '#f59e0b', font: { size: 11 } }   // Orange for Body Fat %
+                            ticks: { color: '#f59e0b', font: { size: 11 } }
                         },
                         y2: { 
-                            display: true, 
+                            display: advancedSettings.showFFMI,           // Toggle y2-axis with FFMI
                             position: 'right', 
                             grid: { drawOnChartArea: false }, 
-                            ticks: { color: '#38bdf8', font: { size: 11 } }   // Blue for FFMI
+                            ticks: { color: '#38bdf8', font: { size: 11 } }
                         }
                     },
                     plugins: {
