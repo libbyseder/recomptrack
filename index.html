@@ -233,13 +233,7 @@
                 </div>
 
                 <div class="pt-3 border-t border-zinc-700">
-                    <div class="flex items-center gap-x-2 mb-3">
-                        <div class="text-sm font-semibold text-zinc-400">Goals</div>
-                        <div class="tooltip">
-                            <i class="fa-solid fa-info-circle text-sky-400 text-xs cursor-help"></i>
-                            <span class="tooltiptext" id="ffmi-profile-tooltip" style="width: 320px; bottom: 120%;"></span>
-                        </div>
-                    </div>
+                    <div class="text-sm font-semibold text-zinc-400 mb-3">Goals</div>
                     <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="text-xs text-zinc-400 block mb-1">Target Weight (lbs)</label>
@@ -250,7 +244,13 @@
                             <input type="number" id="goal-bf" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
                         </div>
                         <div>
-                            <label class="text-xs text-zinc-400 block mb-1">Target FFMI</label>
+                            <div class="flex items-center gap-x-1 mb-1">
+                                <label class="text-xs text-zinc-400">Target FFMI</label>
+                                <div class="tooltip">
+                                    <i class="fa-solid fa-info-circle text-sky-400 text-xs cursor-help"></i>
+                                    <span class="tooltiptext" id="ffmi-profile-tooltip" style="width: 320px; bottom: 130%; left: 50%; transform: translateX(-50%);"></span>
+                                </div>
+                            </div>
                             <input type="number" id="goal-ffmi" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
                         </div>
                     </div>
