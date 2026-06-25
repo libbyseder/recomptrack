@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RecompTrack - Fixed Import</title>
+    <title>RecompTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { font-family: 'Inter', system_ui, sans-serif; }
         .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        .metric-card { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .metric-card:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
     <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-x-3">
                 <div class="w-11 h-11 bg-emerald-500 rounded-2xl flex items-center justify-center">
@@ -21,7 +24,7 @@
                 </div>
                 <div>
                     <span class="font-display text-3xl font-semibold tracking-tighter">RecompTrack</span>
-                    <span class="text-emerald-400 text-xs block -mt-1">FFMI + BODY RECOMP (Fixed Import)</span>
+                    <span class="text-emerald-400 text-xs block -mt-1">FFMI + BODY RECOMP</span>
                 </div>
             </div>
             <div class="flex gap-x-2">
@@ -29,30 +32,284 @@
                     <i class="fa-solid fa-upload"></i>
                     <span>Import Withings CSV</span>
                 </button>
+                <button onclick="showProfileModal()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Profile & Goals</span>
+                </button>
+                <button onclick="showAdvancedSettings()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-cog"></i>
+                    <span>Advanced</span>
+                </button>
             </div>
         </div>
 
-        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 text-center">
-            <h1 class="text-2xl font-semibold mb-4">CSV Import Test Page</h1>
-            <p class="text-zinc-400 mb-6">This version has improved Withings CSV parsing.</p>
+        <!-- Dashboard -->
+        <div class="mb-8">
+            <h1 class="font-display text-4xl font-semibold tracking-tighter mb-6">Dashboard</h1>
             
-            <button onclick="importWithingsCSV()" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
-                Upload Withings CSV
-            </button>
-            
-            <div class="mt-8 text-left max-w-md mx-auto">
-                <div class="text-sm text-zinc-400 mb-2">Debug Info:</div>
-                <div id="debug-info" class="bg-zinc-800 p-3 rounded-xl text-xs font-mono"></div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+                <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                    <div class="text-emerald-400 text-xs font-semibold mb-1">WEIGHT</div>
+                    <div id="dash-weight" class="text-5xl font-semibold tabular-nums">—</div>
+                    <div class="text-xs text-zinc-500">lbs</div>
+                </div>
+                <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                    <div class="text-orange-400 text-xs font-semibold mb-1">BODY FAT</div>
+                    <div id="dash-bf" class="text-5xl font-semibold tabular-nums">—</div>
+                    <div class="text-xs text-zinc-500">%</div>
+                </div>
+                <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                    <div class="text-sky-400 text-xs font-semibold mb-1">FFMI</div>
+                    <div id="dash-ffmi" class="text-5xl font-semibold tabular-nums">—</div>
+                </div>
+                <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+                    <div class="text-teal-400 text-xs font-semibold mb-1">LEAN MASS</div>
+                    <div id="dash-lean" class="text-5xl font-semibold tabular-nums">—</div>
+                    <div class="text-xs text-zinc-500">lbs</div>
+                </div>
             </div>
+        </div>
+
+        <!-- Quick Log + Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+            <div class="lg:col-span-2 bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
+                <div class="font-semibold mb-4">Quick Log</div>
+                <div class="space-y-4">
+                    <input type="date" id="quick-date" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-zinc-400">Weight (lbs)</label>
+                            <input type="number" id="quick-weight" step="0.01" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400">Body Fat %</label>
+                            <input type="number" id="quick-bf" step="0.01" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                        </div>
+                    </div>
+                    <button onclick="quickLog()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-medium text-sm">Log Measurement</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="font-semibold">Trends</div>
+                    <div class="flex items-center gap-x-2">
+                        <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">← Prev</button>
+                        <div class="flex gap-1 text-xs">
+                            <button onclick="filterChart('week')" id="btn-week" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Week</button>
+                            <button onclick="filterChart('month')" id="btn-month" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full active">Month</button>
+                            <button onclick="filterChart('quarter')" id="btn-quarter" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Quarter</button>
+                            <button onclick="filterChart('year')" id="btn-year" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Year</button>
+                            <button onclick="filterChart('all')" id="btn-all" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">All</button>
+                        </div>
+                        <button onclick="shiftPeriod(1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">Next →</button>
+                    </div>
+                </div>
+                <div class="h-72"><canvas id="trend-chart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="font-semibold">History</div>
+                <button onclick="clearData()" class="text-xs text-red-400 hover:text-red-300">Clear All</button>
+            </div>
+            <div id="history-list" class="text-sm max-h-80 overflow-auto"></div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings Modal -->
+    <div id="advanced-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-sm mx-4 p-7">
+            <div class="flex justify-between items-center mb-6">
+                <div class="font-semibold text-xl">Advanced Settings</div>
+                <button onclick="hideAdvancedSettings()" class="text-xl">×</button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span>Show Weight Goal Line</span>
+                    <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
+                </div>
+                <div class="pt-4 border-t border-zinc-700">
+                    <div class="text-sm font-medium mb-2">Weight Goal (lbs)</div>
+                    <input type="number" id="weight-goal-value" value="125" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-2 text-sm">
+                </div>
+            </div>
+            <button onclick="applyAdvancedSettings()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
+                Apply Settings
+            </button>
         </div>
     </div>
 
     <script>
-        function showDebug(msg) {
-            const el = document.getElementById('debug-info');
-            el.innerHTML = msg;
+        let logs = [];
+        let profile = { heightInches: 63.5, name: '', gender: 'female' };
+        let goals = { targetWeight: 125, targetBF: 22, targetFFMI: 17.5 };
+        let chartInstance = null;
+        let currentFilter = 'month';
+        let currentOffset = 0;
+
+        let advancedSettings = {
+            showWeightGoal: true,
+            weightGoal: 125
+        };
+
+        function loadData() {
+            logs = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
+            const p = localStorage.getItem('recomptrack_profile');
+            if (p) profile = JSON.parse(p);
+            const g = localStorage.getItem('recomptrack_goals');
+            if (g) goals = JSON.parse(g);
+            const adv = localStorage.getItem('recomptrack_advanced');
+            if (adv) advancedSettings = JSON.parse(adv);
         }
 
+        function saveData() {
+            localStorage.setItem('recomptrack_logs', JSON.stringify(logs));
+            localStorage.setItem('recomptrack_profile', JSON.stringify(profile));
+            localStorage.setItem('recomptrack_goals', JSON.stringify(goals));
+            localStorage.setItem('recomptrack_advanced', JSON.stringify(advancedSettings));
+        }
+
+        function calculateFFMI(weightLbs, bf) {
+            if (!weightLbs || !bf || !profile.heightInches) return null;
+            const kg = weightLbs / 2.20462;
+            const m = (profile.heightInches * 2.54) / 100;
+            const lean = kg * (1 - bf / 100);
+            return lean / (m * m);
+        }
+
+        function updateDashboard() {
+            if (logs.length === 0) return;
+            const latest = [...logs].sort((a, b) => b.date.localeCompare(a.date))[0];
+            document.getElementById('dash-weight').textContent = latest.weight;
+            document.getElementById('dash-bf').textContent = parseFloat(latest.bf).toFixed(2);
+            const ffmi = calculateFFMI(latest.weight, latest.bf);
+            document.getElementById('dash-ffmi').textContent = ffmi ? ffmi.toFixed(2) : '—';
+            const lean = latest.weight * (1 - latest.bf / 100);
+            document.getElementById('dash-lean').textContent = lean.toFixed(1);
+        }
+
+        function updateChart(period = currentFilter) {
+            currentFilter = period;
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active', 'bg-emerald-500', 'text-white'));
+            const activeBtn = document.getElementById('btn-' + period);
+            if (activeBtn) activeBtn.classList.add('active', 'bg-emerald-500', 'text-white');
+
+            const ctx = document.getElementById('trend-chart');
+            if (!ctx) return;
+            if (chartInstance) chartInstance.destroy();
+
+            let filtered = getFilteredLogs(period, currentOffset);
+            if (filtered.length === 0) {
+                ctx.style.display = 'none';
+                return;
+            } else {
+                ctx.style.display = 'block';
+            }
+
+            const labels = filtered.map(l => '');
+            const weights = filtered.map(l => l.weight);
+            const bfs = filtered.map(l => parseFloat(l.bf));
+
+            const datasets = [
+                { label: 'Weight (lbs)', data: weights, borderColor: '#10b981', borderWidth: 3, tension: 0.3, yAxisID: 'y' },
+                { label: 'Body Fat %', data: bfs, borderColor: '#f59e0b', borderWidth: 2.5, tension: 0.3, yAxisID: 'y1' }
+            ];
+
+            if (advancedSettings.showWeightGoal && advancedSettings.weightGoal) {
+                datasets.push({
+                    label: 'Weight Goal',
+                    data: new Array(weights.length).fill(advancedSettings.weightGoal),
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0,
+                    yAxisID: 'y',
+                    pointRadius: 0
+                });
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { display: false }, grid: { color: '#27272a' } },
+                        y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 11 } } },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } }
+                    },
+                    plugins: { legend: { display: true, position: 'top' } }
+                }
+            });
+        }
+
+        function getFilteredLogs(period, offset = 0) {
+            if (!logs.length) return [];
+            const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
+            const today = new Date();
+            let start = new Date(today);
+            let end = new Date(today);
+
+            switch(period) {
+                case 'week': start.setDate(today.getDate() - 7 - (offset * 7)); end.setDate(today.getDate() - (offset * 7)); break;
+                case 'month': start.setMonth(today.getMonth() - 1 - offset); end.setMonth(today.getMonth() - offset); break;
+                case 'quarter': start.setMonth(today.getMonth() - 3 - (offset * 3)); end.setMonth(today.getMonth() - (offset * 3)); break;
+                case 'year': start.setFullYear(today.getFullYear() - 1 - offset); end.setFullYear(today.getFullYear() - offset); break;
+                case 'all': default: return sorted;
+            }
+            const startStr = start.toISOString().split('T')[0];
+            const endStr = end.toISOString().split('T')[0];
+            return sorted.filter(log => log.date >= startStr && log.date <= endStr);
+        }
+
+        function shiftPeriod(direction) {
+            if (direction > 0) { if (currentOffset > 0) currentOffset--; } 
+            else { currentOffset++; }
+            updateChart(currentFilter);
+        }
+
+        function filterChart(period) {
+            currentOffset = 0;
+            updateChart(period);
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+            if (logs.length === 0) {
+                container.innerHTML = '<p class="text-zinc-400 py-4">No measurements logged yet.</p>';
+                return;
+            }
+            const sorted = [...logs].sort((a, b) => b.date.localeCompare(a.date));
+            sorted.forEach(log => {
+                const ffmi = calculateFFMI(log.weight, log.bf);
+                const div = document.createElement('div');
+                div.className = 'flex justify-between py-3 border-b border-zinc-800 text-sm';
+                div.innerHTML = `
+                    <div>${log.date}</div>
+                    <div class="font-mono">${log.weight} lbs • ${parseFloat(log.bf).toFixed(2)}% • FFMI ${ffmi ? ffmi.toFixed(2) : '—'}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function quickLog() {
+            const date = document.getElementById('quick-date').value || new Date().toISOString().split('T')[0];
+            const weight = parseFloat(document.getElementById('quick-weight').value);
+            const bf = parseFloat(document.getElementById('quick-bf').value);
+            if (!weight || !bf) return alert('Enter Weight and Body Fat %');
+            logs.push({ date, weight, bf: parseFloat(bf.toFixed(2)) });
+            saveData();
+            updateDashboard();
+            updateChart(currentFilter);
+            renderHistory();
+        }
+
+        // ==================== FIXED CSV IMPORT ====================
         function importWithingsCSV() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -60,92 +317,120 @@
             input.onchange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-
                 const reader = new FileReader();
                 reader.onload = function(ev) {
-                    const text = ev.target.result;
-                    parseWithingsCSV(text);
+                    parseWithingsCSVFixed(ev.target.result);
                 };
                 reader.readAsText(file);
             };
             input.click();
         }
 
-        function parseWithingsCSV(csvText) {
+        function parseWithingsCSVFixed(csvText) {
             const lines = csvText.trim().split(/\r?\n/);
             if (lines.length < 2) {
-                alert('CSV appears empty or has no data rows.');
+                alert('CSV appears empty.');
                 return;
             }
 
-            const headerLine = lines[0].toLowerCase();
-            const headers = headerLine.split(',').map(h => h.trim().replace(/"/g, ''));
+            const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            // Find columns more flexibly
+            let dateIdx = header.findIndex(h => h.includes('date'));
+            let weightIdx = header.findIndex(h => h.includes('weight'));
+            let fatMassIdx = header.findIndex(h => h.includes('fat mass'));
+            let muscleIdx = header.findIndex(h => h.includes('muscle mass'));
 
-            showDebug(`Headers found: ${headers.join(' | ')}`);
-
-            let dateIndex = -1;
-            let weightIndex = -1;
-            let fatIndex = -1;
-
-            headers.forEach((h, i) => {
-                if (h.includes('date')) dateIndex = i;
-                if (h.includes('weight')) weightIndex = i;
-                if ((h.includes('fat') && h.includes('%')) || h.includes('body fat') || h.includes('fat mass')) {
-                    fatIndex = i;
-                }
-            });
-
-            if (dateIndex === -1 || weightIndex === -1 || fatIndex === -1) {
-                alert(`Could not find required columns.\n\nFound headers: ${headers.join(', ')}\n\nPlease make sure your CSV has columns for Date, Weight, and Body Fat %.`);
+            if (dateIdx === -1 || weightIdx === -1) {
+                alert('Could not find Date and Weight columns in your CSV.');
                 return;
             }
 
             let added = 0;
-            const existingLogs = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
+            const existing = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
-                
-                const dateVal = values[dateIndex];
-                const weightVal = parseFloat(values[weightIndex]);
-                let fatVal = parseFloat(values[fatIndex]);
+                const date = values[dateIdx];
+                const weight = parseFloat(values[weightIdx]);
+                let bf = null;
 
-                // Try to handle fat mass in kg/lbs if percentage not found
-                if (isNaN(fatVal) && fatIndex !== -1) {
-                    const rawFat = parseFloat(values[fatIndex]);
-                    if (!isNaN(rawFat) && weightVal) {
-                        fatVal = (rawFat / weightVal) * 100;
+                // Calculate body fat % from fat mass if available
+                if (fatMassIdx !== -1 && weight) {
+                    const fatMass = parseFloat(values[fatMassIdx]);
+                    if (!isNaN(fatMass)) {
+                        bf = (fatMass / weight) * 100;
                     }
                 }
 
-                if (!dateVal || isNaN(weightVal) || isNaN(fatVal)) continue;
+                if (!date || isNaN(weight) || bf === null) continue;
 
-                // Normalize date
-                let date;
-                try {
-                    date = new Date(dateVal).toISOString().split('T')[0];
-                } catch {
-                    continue;
-                }
+                const formattedDate = new Date(date).toISOString().split('T')[0];
 
-                // Avoid duplicates
-                if (!existingLogs.find(l => l.date === date)) {
-                    existingLogs.push({
-                        date: date,
-                        weight: weightVal,
-                        bf: parseFloat(fatVal.toFixed(2))
+                if (!existing.find(l => l.date === formattedDate)) {
+                    existing.push({
+                        date: formattedDate,
+                        weight: weight,
+                        bf: parseFloat(bf.toFixed(2))
                     });
                     added++;
                 }
             }
 
             if (added > 0) {
-                localStorage.setItem('recomptrack_logs', JSON.stringify(existingLogs));
+                localStorage.setItem('recomptrack_logs', JSON.stringify(existing));
                 alert(`Successfully imported ${added} new measurements!`);
+                location.reload(); // Refresh to show new data
             } else {
-                alert('No new valid measurements were found in the CSV.\n\nThis can happen if:\n- The data already exists\n- Column names are very different from expected\n- Dates or numbers are in an unexpected format');
+                alert('No new valid measurements found. Data may already exist or columns are not recognized.');
             }
         }
+
+        function showAdvancedSettings() {
+            document.getElementById('show-weight-goal').checked = advancedSettings.showWeightGoal;
+            document.getElementById('weight-goal-value').value = advancedSettings.weightGoal || 125;
+            document.getElementById('advanced-modal').classList.remove('hidden');
+            document.getElementById('advanced-modal').classList.add('flex');
+        }
+
+        function hideAdvancedSettings() {
+            document.getElementById('advanced-modal').classList.add('hidden');
+            document.getElementById('advanced-modal').classList.remove('flex');
+        }
+
+        function applyAdvancedSettings() {
+            advancedSettings.showWeightGoal = document.getElementById('show-weight-goal').checked;
+            advancedSettings.weightGoal = parseFloat(document.getElementById('weight-goal-value').value) || 125;
+            saveData();
+            hideAdvancedSettings();
+            updateChart(currentFilter);
+        }
+
+        function showProfileModal() { /* simplified for now */ alert('Profile modal would open here'); }
+        function hideProfileModal() {}
+        function saveProfileAndGoals() {}
+
+        function clearData() {
+            if (confirm('Clear all data?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function init() {
+            loadData();
+            const dateInput = document.getElementById('quick-date');
+            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+            updateDashboard();
+            renderHistory();
+
+            setTimeout(() => {
+                updateChart('month');
+            }, 100);
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
