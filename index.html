@@ -673,7 +673,7 @@
                 datasets.push({ label: 'FFMI', data: ffmis, borderColor: '#38bdf8', borderWidth: 2.5, tension: 0.3, yAxisID: 'y2' });
             }
 
-            if (advancedSettings.showWeightGoal && goals.targetWeight && advancedSettings.showWeight) {
+            if (advancedSettings.showWeightGoal && goals.targetWeight) {
                 datasets.push({
                     label: 'Weight Goal',
                     data: new Array(weights.length).fill(goals.targetWeight),
@@ -686,7 +686,7 @@
                 });
             }
 
-            if (advancedSettings.showBFGoal && goals.targetBF && advancedSettings.showBF) {
+            if (advancedSettings.showBFGoal && goals.targetBF) {
                 datasets.push({
                     label: 'BF% Goal',
                     data: new Array(bfs.length).fill(goals.targetBF),
@@ -699,7 +699,7 @@
                 });
             }
 
-            if (advancedSettings.showFFMIGoal && goals.targetFFMI && advancedSettings.showFFMI) {
+            if (advancedSettings.showFFMIGoal && goals.targetFFMI) {
                 datasets.push({
                     label: 'FFMI Goal',
                     data: new Array(ffmis.length).fill(goals.targetFFMI),
