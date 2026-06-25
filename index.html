@@ -74,19 +74,30 @@
                     <span class="text-emerald-400 text-xs block -mt-1">FFMI + BODY RECOMP</span>
                 </div>
             </div>
-            <div class="flex gap-x-2">
+
+            <div class="flex items-center gap-x-3">
+                <!-- Current User -->
+                <div id="current-user-badge" onclick="showUserSwitcher()" 
+                     class="hidden items-center gap-x-2 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm cursor-pointer hover:bg-zinc-800">
+                    <i class="fa-solid fa-user text-emerald-400"></i>
+                    <span id="current-user-name" class="font-medium"></span>
+                </div>
+
                 <button onclick="showQuickLogModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium flex items-center gap-x-2">
                     <i class="fa-solid fa-plus"></i>
                     <span>Quick Log</span>
                 </button>
+                
                 <button onclick="importWithingsCSV()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-upload"></i>
                     <span>Import CSV</span>
                 </button>
+                
                 <button onclick="showProfileModal()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-user"></i>
                     <span>Profile & Goals</span>
                 </button>
+                
                 <button onclick="showAdvancedSettings()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-cog"></i>
                     <span>Advanced</span>
@@ -99,6 +110,7 @@
             <h1 class="font-display text-4xl font-semibold tracking-tighter mb-6">Dashboard</h1>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+                <!-- Weight -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -119,6 +131,7 @@
                     </div>
                 </div>
 
+                <!-- Body Fat -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -139,6 +152,7 @@
                     </div>
                 </div>
 
+                <!-- FFMI -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -159,6 +173,7 @@
                     </div>
                 </div>
 
+                <!-- Lean Mass -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="text-teal-400 text-xs font-semibold mb-1">LEAN MASS</div>
                     <div id="dash-lean" class="text-5xl font-semibold tabular-nums">—</div>
@@ -167,7 +182,7 @@
             </div>
         </div>
 
-        <!-- Chart Section -->
+        <!-- Chart -->
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-8">
             <div class="flex items-center justify-between mb-2">
                 <div class="font-semibold">Trends</div>
@@ -212,6 +227,36 @@
         </div>
     </div>
 
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[200]">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-sm mx-4 p-7">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-dumbbell text-white text-3xl"></i>
+                </div>
+                <h2 class="font-display text-2xl font-semibold">Welcome to RecompTrack</h2>
+                <p class="text-zinc-400 text-sm mt-1">Enter a name to start tracking your data</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1.5">Your Name</label>
+                    <input type="text" id="signin-name" placeholder="e.g. Libby or Alex" 
+                           class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <button onclick="signIn()" 
+                    class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
+                Start Tracking
+            </button>
+            
+            <p class="text-center text-[10px] text-zinc-500 mt-4">
+                Your data is stored privately in your browser under this name.
+            </p>
+        </div>
+    </div>
+
     <!-- Quick Log Modal -->
     <div id="quick-log-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
@@ -239,7 +284,7 @@
         </div>
     </div>
 
-    <!-- Profile & Goals Modal -->
+    <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
             <div class="flex justify-between items-center mb-6">
@@ -303,7 +348,7 @@
         </div>
     </div>
 
-    <!-- Advanced Settings Modal -->
+    <!-- Advanced Settings -->
     <div id="advanced-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-sm mx-4 p-7">
             <div class="flex justify-between items-center mb-6">
@@ -352,6 +397,7 @@
     </div>
 
     <script>
+        let currentUser = null;
         let logs = [];
         let profile = { heightInches: 63.5, name: '', gender: '' };
         let goals = { targetWeight: 125, targetBF: 22, targetFFMI: 17.5 };
@@ -368,23 +414,96 @@
             showFFMIGoal: true
         };
 
-        function loadData() {
-            logs = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
-            const p = localStorage.getItem('recomptrack_profile');
+        // ==================== MULTI-USER HELPERS ====================
+        function getStorageKey(key) {
+            if (!currentUser) return `recomptrack_${key}`;
+            return `recomptrack_${currentUser}_${key}`;
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+
+            logs = JSON.parse(localStorage.getItem(getStorageKey('logs')) || '[]');
+            const p = localStorage.getItem(getStorageKey('profile'));
             if (p) profile = JSON.parse(p);
-            const g = localStorage.getItem('recomptrack_goals');
+            const g = localStorage.getItem(getStorageKey('goals'));
             if (g) goals = JSON.parse(g);
-            const adv = localStorage.getItem('recomptrack_advanced');
+            const adv = localStorage.getItem(getStorageKey('advanced'));
             if (adv) advancedSettings = JSON.parse(adv);
         }
 
-        function saveData() {
-            localStorage.setItem('recomptrack_logs', JSON.stringify(logs));
-            localStorage.setItem('recomptrack_profile', JSON.stringify(profile));
-            localStorage.setItem('recomptrack_goals', JSON.stringify(goals));
-            localStorage.setItem('recomptrack_advanced', JSON.stringify(advancedSettings));
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(getStorageKey('logs'), JSON.stringify(logs));
+            localStorage.setItem(getStorageKey('profile'), JSON.stringify(profile));
+            localStorage.setItem(getStorageKey('goals'), JSON.stringify(goals));
+            localStorage.setItem(getStorageKey('advanced'), JSON.stringify(advancedSettings));
         }
 
+        function signIn() {
+            const nameInput = document.getElementById('signin-name').value.trim();
+            if (!nameInput) {
+                alert('Please enter a name');
+                return;
+            }
+            
+            currentUser = nameInput;
+            localStorage.setItem('recomptrack_current_user', currentUser);
+            
+            document.getElementById('signin-modal').classList.add('hidden');
+            document.getElementById('signin-modal').classList.remove('flex');
+            
+            // Load this user's data
+            loadUserData();
+            updateCurrentUserBadge();
+            updateDashboard();
+            renderHistory();
+            updateChart('month');
+        }
+
+        function updateCurrentUserBadge() {
+            const badge = document.getElementById('current-user-badge');
+            const nameSpan = document.getElementById('current-user-name');
+            
+            if (currentUser) {
+                nameSpan.textContent = currentUser;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+
+        function showUserSwitcher() {
+            const newName = prompt('Switch to which user?', currentUser || '');
+            if (newName && newName.trim()) {
+                currentUser = newName.trim();
+                localStorage.setItem('recomptrack_current_user', currentUser);
+                loadUserData();
+                updateCurrentUserBadge();
+                updateDashboard();
+                renderHistory();
+                updateChart(currentFilter);
+            }
+        }
+
+        function checkLogin() {
+            const savedUser = localStorage.getItem('recomptrack_current_user');
+            if (savedUser) {
+                currentUser = savedUser;
+                loadUserData();
+                updateCurrentUserBadge();
+                return true;
+            } else {
+                // Show sign in modal
+                document.getElementById('signin-modal').classList.remove('hidden');
+                document.getElementById('signin-modal').classList.add('flex');
+                return false;
+            }
+        }
+
+        // ==================== REST OF THE APP ====================
         function calculateFFMI(weightLbs, bf) {
             if (!weightLbs || !bf || !profile.heightInches) return null;
             const kg = weightLbs / 2.20462;
@@ -501,13 +620,8 @@
                 case 'quarter':
                     let qYear = today.getFullYear();
                     let qNum = Math.floor(today.getMonth() / 3) + 1;
-                    
-                    // Go back offset quarters
                     qNum -= offset;
-                    while (qNum < 1) {
-                        qNum += 4;
-                        qYear--;
-                    }
+                    while (qNum < 1) { qNum += 4; qYear--; }
                     label = `Q${qNum} ${qYear}`;
                     break;
                 case 'year':
@@ -637,38 +751,26 @@
 
             switch(period) {
                 case 'week':
-                    start = new Date(today);
-                    start.setDate(today.getDate() - 7 - (offset * 7));
-                    end = new Date(today);
-                    end.setDate(today.getDate() - (offset * 7));
+                    start = new Date(today); start.setDate(today.getDate() - 7 - (offset * 7));
+                    end = new Date(today); end.setDate(today.getDate() - (offset * 7));
                     break;
-                    
                 case 'month':
                     start = new Date(today.getFullYear(), today.getMonth() - 1 - offset, 1);
                     end = new Date(today.getFullYear(), today.getMonth() - offset, 0);
                     break;
-                    
                 case 'quarter':
-                    // Calculate target quarter
                     let currentQ = Math.floor(today.getMonth() / 3);
                     let targetQ = currentQ - offset;
                     let targetYear = today.getFullYear();
-                    
-                    while (targetQ < 0) {
-                        targetQ += 4;
-                        targetYear--;
-                    }
-                    
+                    while (targetQ < 0) { targetQ += 4; targetYear--; }
                     const startMonth = targetQ * 3;
                     start = new Date(targetYear, startMonth, 1);
                     end = new Date(targetYear, startMonth + 3, 0);
                     break;
-                    
                 case 'year':
                     start = new Date(today.getFullYear() - offset, 0, 1);
                     end = new Date(today.getFullYear() - offset, 11, 31);
                     break;
-                    
                 case 'all':
                 default:
                     return sorted;
@@ -680,11 +782,8 @@
         }
 
         function shiftPeriod(direction) {
-            if (direction > 0) {
-                if (currentOffset > 0) currentOffset--;
-            } else {
-                currentOffset++;
-            }
+            if (direction > 0) { if (currentOffset > 0) currentOffset--; } 
+            else { currentOffset++; }
             updateChart(currentFilter);
         }
 
@@ -733,7 +832,7 @@
             if (!weight || !bf) return alert('Enter Weight and Body Fat %');
 
             logs.push({ date, weight, bf: parseFloat(bf.toFixed(2)) });
-            saveData();
+            saveUserData();
             updateDashboard();
             updateChart(currentFilter);
             renderHistory();
@@ -768,7 +867,7 @@
             if (dateIdx === -1 || weightIdx === -1) return alert('Could not find Date and Weight columns');
 
             let added = 0;
-            const existing = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
+            const existing = logs;
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
@@ -791,7 +890,8 @@
             }
 
             if (added > 0) {
-                localStorage.setItem('recomptrack_logs', JSON.stringify(existing));
+                logs = existing;
+                saveUserData();
                 alert(`Imported ${added} measurements!`);
                 location.reload();
             } else {
@@ -825,7 +925,7 @@
             goals.targetBF = parseFloat(document.getElementById('goal-bf').value) || null;
             goals.targetFFMI = parseFloat(document.getElementById('goal-ffmi').value) || null;
 
-            saveData();
+            saveUserData();
             hideProfileModal();
             updateDashboard();
             
@@ -859,25 +959,32 @@
             advancedSettings.showBFGoal = document.getElementById('show-bf-goal').checked;
             advancedSettings.showFFMIGoal = document.getElementById('show-ffmi-goal').checked;
 
-            saveData();
+            saveUserData();
             hideAdvancedSettings();
             updateChart(currentFilter);
         }
 
         function clearData() {
-            if (confirm('Clear all data?')) {
-                localStorage.clear();
+            if (confirm('Clear all data for this user?')) {
+                if (currentUser) {
+                    localStorage.removeItem(getStorageKey('logs'));
+                    localStorage.removeItem(getStorageKey('profile'));
+                    localStorage.removeItem(getStorageKey('goals'));
+                    localStorage.removeItem(getStorageKey('advanced'));
+                }
                 location.reload();
             }
         }
 
         function init() {
-            loadData();
-            const dateInput = document.getElementById('quick-date');
-            if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
-            updateDashboard();
-            renderHistory();
-            setTimeout(() => updateChart('month'), 100);
+            // Check if user is logged in
+            const isLoggedIn = checkLogin();
+            
+            if (isLoggedIn) {
+                updateDashboard();
+                renderHistory();
+                setTimeout(() => updateChart('month'), 100);
+            }
         }
 
         window.onload = init;
