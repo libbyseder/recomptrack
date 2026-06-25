@@ -31,7 +31,6 @@
             box-shadow: 0 0 0 2px #27272a;
             z-index: 10;
         }
-
         .tooltip {
             position: relative;
             display: inline-block;
@@ -100,8 +99,6 @@
             <h1 class="font-display text-4xl font-semibold tracking-tighter mb-6">Dashboard</h1>
             
             <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
-                
-                <!-- Weight Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -122,7 +119,6 @@
                     </div>
                 </div>
 
-                <!-- Body Fat Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
@@ -143,13 +139,12 @@
                     </div>
                 </div>
 
-                <!-- FFMI Card with spacer for alignment -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <div class="text-sky-400 text-xs font-semibold">FFMI</div>
                             <div id="dash-ffmi" class="text-5xl font-semibold tabular-nums">—</div>
-                            <div class="text-xs text-zinc-500">&nbsp;</div> <!-- Spacer for alignment -->
+                            <div class="text-xs text-zinc-500">&nbsp;</div>
                         </div>
                         <div id="ffmi-goal-text" class="text-right text-xs text-zinc-400"></div>
                     </div>
@@ -164,7 +159,6 @@
                     </div>
                 </div>
 
-                <!-- Lean Mass Card -->
                 <div class="metric-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="text-teal-400 text-xs font-semibold mb-1">LEAN MASS</div>
                     <div id="dash-lean" class="text-5xl font-semibold tabular-nums">—</div>
@@ -173,26 +167,40 @@
             </div>
         </div>
 
-        <!-- Chart Section (Quick Log card removed, now button at top) -->
-        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
-            <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="font-semibold">Trends</div>
-                    <div class="flex items-center gap-x-2">
-                        <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">← Prev</button>
-                        <div class="flex gap-1 text-xs">
-                            <button onclick="filterChart('week')" id="btn-week" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Week</button>
-                            <button onclick="filterChart('month')" id="btn-month" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full active">Month</button>
-                            <button onclick="filterChart('quarter')" id="btn-quarter" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Quarter</button>
-                            <button onclick="filterChart('year')" id="btn-year" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Year</button>
-                            <button onclick="filterChart('all')" id="btn-all" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">All</button>
-                        </div>
-                        <button onclick="shiftPeriod(1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full">Next →</button>
+        <!-- Chart Section -->
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-8">
+            <div class="flex items-center justify-between mb-2">
+                <div class="font-semibold">Trends</div>
+                
+                <!-- Time Navigation -->
+                <div class="flex items-center gap-x-2">
+                    <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full flex items-center gap-x-1">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        <span>Prev</span>
+                    </button>
+                    
+                    <div class="flex flex-wrap gap-1 text-xs">
+                        <button onclick="filterChart('week')" id="btn-week" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Week</button>
+                        <button onclick="filterChart('month')" id="btn-month" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full active">Month</button>
+                        <button onclick="filterChart('quarter')" id="btn-quarter" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Quarter</button>
+                        <button onclick="filterChart('year')" id="btn-year" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">Year</button>
+                        <button onclick="filterChart('all')" id="btn-all" class="time-btn px-3 py-1 border border-zinc-600 hover:bg-zinc-800 rounded-full">All</button>
                     </div>
+                    
+                    <button onclick="shiftPeriod(1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full flex items-center gap-x-1">
+                        <span>Next</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
-                <div class="h-80">
-                    <canvas id="trend-chart"></canvas>
-                </div>
+            </div>
+
+            <!-- Period Label -->
+            <div id="chart-period-label" class="text-xs text-zinc-400 mb-3 font-medium tracking-wide">
+                This Month
+            </div>
+
+            <div class="h-80">
+                <canvas id="trend-chart"></canvas>
             </div>
         </div>
 
@@ -233,7 +241,7 @@
         </div>
     </div>
 
-    <!-- Profile & Goals Modal (with FFMI tooltip) -->
+    <!-- Profile & Goals Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
             <div class="flex justify-between items-center mb-6">
@@ -352,6 +360,7 @@
         let chartInstance = null;
         let currentFilter = 'month';
         let currentOffset = 0;
+        let currentPeriodLabel = 'This Month';
 
         let advancedSettings = {
             showWeight: true,
@@ -406,8 +415,8 @@
                 ];
             } else {
                 return [
-                    { range: "Men: <17 / 17-19 / 19-21 / 21-23 / 23+", label: "Poor → Elite" },
-                    { range: "Women: 13-14.5 / 15-16.5 / 17-18 / 18.5-20 / 20+", label: "Developing → Elite" }
+                    { range: "Men", label: "<17 / 17-19 / 19-21 / 21-23 / 23+ → Poor to Elite" },
+                    { range: "Women", label: "13-14.5 / 15-16.5 / 17-18 / 18.5-20 / 20+ → Developing to Elite" }
                 ];
             }
         }
@@ -445,7 +454,6 @@
         }
 
         function updateGoalIndicators(latest) {
-            // Weight
             if (goals.targetWeight) {
                 const weightDiff = Math.abs(latest.weight - goals.targetWeight);
                 const weightProgress = Math.min(100, Math.max(0, ((30 - weightDiff) / 30) * 100));
@@ -456,7 +464,6 @@
                 document.getElementById('weight-goal-bar').style.width = '0%';
             }
 
-            // Body Fat
             if (goals.targetBF) {
                 const bfDiff = Math.abs(latest.bf - goals.targetBF);
                 const bfProgress = Math.min(100, Math.max(0, ((10 - bfDiff) / 10) * 100));
@@ -467,7 +474,6 @@
                 document.getElementById('bf-goal-bar').style.width = '0%';
             }
 
-            // FFMI
             const ffmi = calculateFFMI(latest.weight, latest.bf);
             if (goals.targetFFMI && ffmi) {
                 const ffmiDiff = Math.abs(ffmi - goals.targetFFMI);
@@ -480,11 +486,49 @@
             }
         }
 
+        function getPeriodLabel(period, offset = 0) {
+            const today = new Date();
+            let label = '';
+
+            switch(period) {
+                case 'week':
+                    if (offset === 0) label = 'This Week';
+                    else if (offset === 1) label = 'Last Week';
+                    else label = `${offset} Weeks Ago`;
+                    break;
+                case 'month':
+                    const monthDate = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+                    const monthName = monthDate.toLocaleString('default', { month: 'long' });
+                    const year = monthDate.getFullYear();
+                    if (offset === 0) label = `${monthName} ${year}`;
+                    else label = `${monthName} ${year}`;
+                    break;
+                case 'quarter':
+                    const quarterDate = new Date(today.getFullYear(), today.getMonth() - (offset * 3), 1);
+                    const quarter = Math.floor(quarterDate.getMonth() / 3) + 1;
+                    label = offset === 0 ? 'This Quarter' : `Q${quarter} ${quarterDate.getFullYear()}`;
+                    break;
+                case 'year':
+                    const yearDate = new Date(today.getFullYear() - offset, 0, 1);
+                    label = offset === 0 ? 'This Year' : `${yearDate.getFullYear()}`;
+                    break;
+                case 'all':
+                    label = 'All Time';
+                    break;
+            }
+            return label;
+        }
+
         function updateChart(period = currentFilter) {
             currentFilter = period;
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active', 'bg-emerald-500', 'text-white'));
             const activeBtn = document.getElementById('btn-' + period);
             if (activeBtn) activeBtn.classList.add('active', 'bg-emerald-500', 'text-white');
+
+            // Update period label
+            currentPeriodLabel = getPeriodLabel(period, currentOffset);
+            const labelEl = document.getElementById('chart-period-label');
+            if (labelEl) labelEl.textContent = currentPeriodLabel;
 
             const ctx = document.getElementById('trend-chart');
             if (!ctx) return;
@@ -515,12 +559,11 @@
                 datasets.push({ label: 'FFMI', data: ffmis, borderColor: '#38bdf8', borderWidth: 2.5, tension: 0.3, yAxisID: 'y2' });
             }
 
-            // Goal Lines - Weight Goal now green to match data
             if (advancedSettings.showWeightGoal && goals.targetWeight && advancedSettings.showWeight) {
                 datasets.push({
                     label: 'Weight Goal',
                     data: new Array(weights.length).fill(goals.targetWeight),
-                    borderColor: '#10b981', // Changed to green to match Weight data
+                    borderColor: '#10b981',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     tension: 0,
@@ -569,7 +612,15 @@
                         y2: { display: advancedSettings.showFFMI, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#38bdf8', font: { size: 11 } } }
                     },
                     plugins: {
-                        legend: { display: true, position: 'top' },
+                        legend: { 
+                            display: true, 
+                            position: 'bottom',           // Moved legend below chart
+                            labels: { 
+                                boxWidth: 12, 
+                                font: { size: 11 }, 
+                                padding: 20 
+                            } 
+                        },
                         tooltip: {
                             callbacks: {
                                 title: function(context) {
@@ -590,20 +641,38 @@
             let end = new Date(today);
 
             switch(period) {
-                case 'week': start.setDate(today.getDate() - 7 - (offset * 7)); end.setDate(today.getDate() - (offset * 7)); break;
-                case 'month': start.setMonth(today.getMonth() - 1 - offset); end.setMonth(today.getMonth() - offset); break;
-                case 'quarter': start.setMonth(today.getMonth() - 3 - (offset * 3)); end.setMonth(today.getMonth() - (offset * 3)); break;
-                case 'year': start.setFullYear(today.getFullYear() - 1 - offset); end.setFullYear(today.getFullYear() - offset); break;
-                case 'all': default: return sorted;
+                case 'week':
+                    start.setDate(today.getDate() - 7 - (offset * 7));
+                    end.setDate(today.getDate() - (offset * 7));
+                    break;
+                case 'month':
+                    start.setMonth(today.getMonth() - 1 - offset);
+                    end.setMonth(today.getMonth() - offset);
+                    break;
+                case 'quarter':
+                    start.setMonth(today.getMonth() - 3 - (offset * 3));
+                    end.setMonth(today.getMonth() - (offset * 3));
+                    break;
+                case 'year':
+                    start.setFullYear(today.getFullYear() - 1 - offset);
+                    end.setFullYear(today.getFullYear() - offset);
+                    break;
+                case 'all':
+                default:
+                    return sorted;
             }
+
             const startStr = start.toISOString().split('T')[0];
             const endStr = end.toISOString().split('T')[0];
             return sorted.filter(log => log.date >= startStr && log.date <= endStr);
         }
 
         function shiftPeriod(direction) {
-            if (direction > 0) { if (currentOffset > 0) currentOffset--; } 
-            else { currentOffset++; }
+            if (direction > 0) {
+                if (currentOffset > 0) currentOffset--;
+            } else {
+                currentOffset++;
+            }
             updateChart(currentFilter);
         }
 
@@ -748,7 +817,6 @@
             hideProfileModal();
             updateDashboard();
             
-            // Update chart goal lines immediately when goals change
             if (chartInstance) {
                 updateChart(currentFilter);
             }
