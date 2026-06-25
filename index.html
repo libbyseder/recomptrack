@@ -43,10 +43,6 @@
             visibility: visible;
             opacity: 1;
         }
-        
-        .chart-container {
-            position: relative;
-        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -151,10 +147,18 @@
                 <div class="font-semibold mb-4">Quick Log</div>
                 <div class="space-y-4">
                     <input type="date" id="quick-date" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                    
                     <div class="grid grid-cols-2 gap-4">
-                        <input type="number" id="quick-weight" placeholder="Weight (lbs)" step="0.01" class="bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
-                        <input type="number" id="quick-bf" placeholder="Body Fat %" step="0.01" class="bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                        <div>
+                            <label class="text-xs text-zinc-400">Weight (lbs)</label>
+                            <input type="number" id="quick-weight" step="0.01" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400">Body Fat %</label>
+                            <input type="number" id="quick-bf" step="0.01" class="w-full bg-zinc-800 border border-zinc-600 rounded-2xl px-4 py-2 text-sm">
+                        </div>
                     </div>
+
                     <button onclick="quickLog()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-medium text-sm">Log Measurement</button>
                 </div>
             </div>
@@ -163,7 +167,6 @@
                 <div class="flex items-center justify-between mb-4">
                     <div class="font-semibold">Trends</div>
                     
-                    <!-- Time Navigation -->
                     <div class="flex items-center gap-x-2">
                         <button onclick="shiftPeriod(-1)" class="px-3 py-1 text-xs border border-zinc-600 hover:bg-zinc-800 rounded-full flex items-center gap-x-1">
                             <i class="fa-solid fa-chevron-left"></i>
@@ -185,7 +188,7 @@
                     </div>
                 </div>
                 
-                <div class="h-80 chart-container">
+                <div class="h-80">
                     <canvas id="trend-chart"></canvas>
                 </div>
             </div>
@@ -209,48 +212,48 @@
                 <button onclick="hideAdvancedSettings()" class="text-xl">×</button>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div class="flex items-center justify-between">
-                    <span>Show Weight Goal Line</span>
-                    <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
+                    <span class="text-sm">Show Weight Goal Line</span>
+                    <input type="checkbox" id="show-weight-goal" class="w-5 h-5 accent-emerald-500">
                 </div>
                 
                 <div class="flex items-center justify-between">
-                    <span>Show Normality Zone (Weight)</span>
-                    <input type="checkbox" id="show-normality-zone" checked class="w-5 h-5 accent-emerald-500">
+                    <span class="text-sm">Show Normality Zone</span>
+                    <input type="checkbox" id="show-normality-zone" class="w-5 h-5 accent-emerald-500">
                 </div>
 
                 <div class="pt-4 border-t border-zinc-700">
-                    <div class="text-sm text-zinc-400 mb-2">Normality Zone Range (lbs)</div>
+                    <div class="text-sm font-medium mb-2">Weight Goal (lbs)</div>
+                    <input type="number" id="weight-goal-value" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-2 text-sm">
+                </div>
+
+                <div>
+                    <div class="text-sm font-medium mb-2">Normality Zone (lbs)</div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-xs text-zinc-400">Min</label>
-                            <input type="number" id="normality-min" value="115" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
+                            <input type="number" id="normality-min" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
                         </div>
                         <div>
                             <label class="text-xs text-zinc-400">Max</label>
-                            <input type="number" id="normality-max" value="140" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
+                            <input type="number" id="normality-max" step="0.1" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
                         </div>
                     </div>
-                </div>
-
-                <div class="pt-4 border-t border-zinc-700">
-                    <div class="text-sm text-zinc-400 mb-2">Weight Goal (lbs)</div>
-                    <input type="number" id="weight-goal-value" value="125" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
                 </div>
             </div>
 
             <button onclick="applyAdvancedSettings()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
-                Apply Settings
+                Apply &amp; Update Chart
             </button>
         </div>
     </div>
 
-    <!-- Profile & Goals Modal -->
+    <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
         <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md mx-4 p-7">
             <div class="flex justify-between items-center mb-6">
-                <div class="font-semibold text-xl">Profile & Goals</div>
+                <div class="font-semibold text-xl">Profile &amp; Goals</div>
                 <button onclick="hideProfileModal()" class="text-xl">×</button>
             </div>
 
@@ -294,7 +297,7 @@
             </div>
 
             <button onclick="saveProfileAndGoals()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
-                Save Profile & Goals
+                Save Profile &amp; Goals
             </button>
         </div>
     </div>
@@ -307,7 +310,6 @@
         let currentFilter = 'month';
         let currentOffset = 0;
 
-        // Advanced settings defaults
         let advancedSettings = {
             showWeightGoal: true,
             showNormalityZone: true,
@@ -322,7 +324,6 @@
             if (p) profile = JSON.parse(p);
             const g = localStorage.getItem('recomptrack_goals');
             if (g) goals = JSON.parse(g);
-            
             const adv = localStorage.getItem('recomptrack_advanced');
             if (adv) advancedSettings = JSON.parse(adv);
         }
@@ -375,11 +376,9 @@
                 <strong>Lean Mass</strong> = Weight × (1 − Body Fat %)<br><br>
                 <strong>FFMI Categories (${profile.gender === 'male' ? 'Men' : 'Women'})</strong><br>
             `;
-
             categories.forEach(cat => {
                 html += `• <strong>${cat.range}</strong> → ${cat.label}<br>`;
             });
-
             tooltip.innerHTML = html;
         }
 
@@ -479,10 +478,9 @@
                 ctx.style.display = 'block';
             }
 
-            const labels = filteredLogs.map(l => ''); // Remove dates from bottom
+            const labels = filteredLogs.map(l => ''); // Hide dates
             const weights = filteredLogs.map(l => l.weight);
             const bfs = filteredLogs.map(l => parseFloat(l.bf));
-            const ffmis = filteredLogs.map(l => calculateFFMI(l.weight, l.bf) || null);
 
             const datasets = [
                 {
@@ -492,8 +490,7 @@
                     borderWidth: 3,
                     tension: 0.3,
                     yAxisID: 'y',
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    pointRadius: 3
                 },
                 {
                     label: 'Body Fat %',
@@ -502,30 +499,28 @@
                     borderWidth: 2.5,
                     tension: 0.3,
                     yAxisID: 'y1',
-                    pointRadius: 2,
-                    pointHoverRadius: 4
+                    pointRadius: 2
                 }
             ];
 
-            // Add Weight Goal Line if enabled
-            if (advancedSettings.showWeightGoal && goals.targetWeight) {
-                const goalLine = new Array(weights.length).fill(goals.targetWeight);
+            // Add Weight Goal Line
+            if (advancedSettings.showWeightGoal && advancedSettings.weightGoal) {
+                const goalData = new Array(weights.length).fill(advancedSettings.weightGoal);
                 datasets.push({
                     label: 'Weight Goal',
-                    data: goalLine,
+                    data: goalData,
                     borderColor: '#ef4444',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     tension: 0,
                     yAxisID: 'y',
-                    pointRadius: 0,
-                    pointHoverRadius: 0
+                    pointRadius: 0
                 });
             }
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: { labels: labels, datasets: datasets },
+                data: { labels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -533,7 +528,7 @@
                     scales: {
                         x: {
                             grid: { color: '#27272a', drawBorder: false },
-                            ticks: { display: false } // Remove dates
+                            ticks: { display: false }
                         },
                         y: { 
                             position: 'left', 
@@ -602,7 +597,7 @@
             const weight = parseFloat(document.getElementById('quick-weight').value);
             const bf = parseFloat(document.getElementById('quick-bf').value);
 
-            if (!weight || !bf) return alert('Enter weight and body fat %');
+            if (!weight || !bf) return alert('Please enter Weight and Body Fat %');
 
             logs.push({ date, weight, bf: parseFloat(bf.toFixed(2)) });
             saveData();
@@ -645,7 +640,6 @@
                     }
                     if (h.includes('weight')) weight = parseFloat(val);
                     if ((h.includes('fat') && h.includes('%')) || h.includes('body fat')) fat = parseFloat(val);
-                    if (h.includes('fat mass') && weight) fat = (parseFloat(val) / weight) * 100;
                 });
                 if (date && weight && fat && !logs.find(l => l.date === date)) {
                     logs.push({ date, weight, bf: parseFloat(fat.toFixed(2)) });
@@ -697,9 +691,9 @@
         function showAdvancedSettings() {
             document.getElementById('show-weight-goal').checked = advancedSettings.showWeightGoal;
             document.getElementById('show-normality-zone').checked = advancedSettings.showNormalityZone;
+            document.getElementById('weight-goal-value').value = advancedSettings.weightGoal || goals.targetWeight || 125;
             document.getElementById('normality-min').value = advancedSettings.normalityMin;
             document.getElementById('normality-max').value = advancedSettings.normalityMax;
-            document.getElementById('weight-goal-value').value = advancedSettings.weightGoal || goals.targetWeight || 125;
             
             document.getElementById('advanced-modal').classList.remove('hidden');
             document.getElementById('advanced-modal').classList.add('flex');
@@ -713,9 +707,9 @@
         function applyAdvancedSettings() {
             advancedSettings.showWeightGoal = document.getElementById('show-weight-goal').checked;
             advancedSettings.showNormalityZone = document.getElementById('show-normality-zone').checked;
+            advancedSettings.weightGoal = parseFloat(document.getElementById('weight-goal-value').value) || 125;
             advancedSettings.normalityMin = parseFloat(document.getElementById('normality-min').value) || 115;
             advancedSettings.normalityMax = parseFloat(document.getElementById('normality-max').value) || 140;
-            advancedSettings.weightGoal = parseFloat(document.getElementById('weight-goal-value').value) || 125;
 
             saveData();
             hideAdvancedSettings();
