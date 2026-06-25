@@ -328,10 +328,26 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { grid: { color: '#27272a' }, ticks: { display: false } },
-                        y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 11 } } },
-                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } },
-                        y2: { display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#38bdf8', font: { size: 11 } } }
+                        x: {
+                            grid: { color: '#27272a' },
+                            ticks: { display: false }
+                        },
+                        y: { 
+                            position: 'left', 
+                            grid: { color: '#27272a' }, 
+                            ticks: { color: '#10b981', font: { size: 11 } }   // Green for Weight
+                        },
+                        y1: { 
+                            position: 'right', 
+                            grid: { drawOnChartArea: false }, 
+                            ticks: { color: '#f59e0b', font: { size: 11 } }   // Orange for Body Fat %
+                        },
+                        y2: { 
+                            display: true, 
+                            position: 'right', 
+                            grid: { drawOnChartArea: false }, 
+                            ticks: { color: '#38bdf8', font: { size: 11 } }   // Blue for FFMI
+                        }
                     },
                     plugins: {
                         legend: { display: true, position: 'top' },
