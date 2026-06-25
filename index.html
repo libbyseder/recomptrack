@@ -43,6 +43,10 @@
             visibility: visible;
             opacity: 1;
         }
+        
+        .chart-container {
+            position: relative;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -66,6 +70,10 @@
                 <button onclick="showProfileModal()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
                     <i class="fa-solid fa-user"></i>
                     <span>Profile & Goals</span>
+                </button>
+                <button onclick="showAdvancedSettings()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-cog"></i>
+                    <span>Advanced</span>
                 </button>
             </div>
         </div>
@@ -176,7 +184,10 @@
                         </button>
                     </div>
                 </div>
-                <div class="h-72"><canvas id="trend-chart"></canvas></div>
+                
+                <div class="h-80 chart-container">
+                    <canvas id="trend-chart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -187,6 +198,51 @@
                 <button onclick="clearData()" class="text-xs text-red-400 hover:text-red-300">Clear All</button>
             </div>
             <div id="history-list" class="text-sm max-h-80 overflow-auto"></div>
+        </div>
+    </div>
+
+    <!-- Advanced Settings Modal -->
+    <div id="advanced-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-sm mx-4 p-7">
+            <div class="flex justify-between items-center mb-6">
+                <div class="font-semibold text-xl">Advanced Settings</div>
+                <button onclick="hideAdvancedSettings()" class="text-xl">×</button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span>Show Weight Goal Line</span>
+                    <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span>Show Normality Zone (Weight)</span>
+                    <input type="checkbox" id="show-normality-zone" checked class="w-5 h-5 accent-emerald-500">
+                </div>
+
+                <div class="pt-4 border-t border-zinc-700">
+                    <div class="text-sm text-zinc-400 mb-2">Normality Zone Range (lbs)</div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-zinc-400">Min</label>
+                            <input type="number" id="normality-min" value="115" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400">Max</label>
+                            <input type="number" id="normality-max" value="140" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-zinc-700">
+                    <div class="text-sm text-zinc-400 mb-2">Weight Goal (lbs)</div>
+                    <input type="number" id="weight-goal-value" value="125" class="w-full bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <button onclick="applyAdvancedSettings()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
+                Apply Settings
+            </button>
         </div>
     </div>
 
@@ -246,10 +302,19 @@
     <script>
         let logs = [];
         let profile = { heightInches: 63.5, name: '', gender: 'female' };
-        let goals = { targetWeight: 130, targetBF: 22, targetFFMI: 17.5 };
+        let goals = { targetWeight: 125, targetBF: 22, targetFFMI: 17.5 };
         let chartInstance = null;
         let currentFilter = 'month';
-        let currentOffset = 0; // 0 = most recent period
+        let currentOffset = 0;
+
+        // Advanced settings defaults
+        let advancedSettings = {
+            showWeightGoal: true,
+            showNormalityZone: true,
+            normalityMin: 115,
+            normalityMax: 140,
+            weightGoal: 125
+        };
 
         function loadData() {
             logs = JSON.parse(localStorage.getItem('recomptrack_logs') || '[]');
@@ -257,12 +322,16 @@
             if (p) profile = JSON.parse(p);
             const g = localStorage.getItem('recomptrack_goals');
             if (g) goals = JSON.parse(g);
+            
+            const adv = localStorage.getItem('recomptrack_advanced');
+            if (adv) advancedSettings = JSON.parse(adv);
         }
 
         function saveData() {
             localStorage.setItem('recomptrack_logs', JSON.stringify(logs));
             localStorage.setItem('recomptrack_profile', JSON.stringify(profile));
             localStorage.setItem('recomptrack_goals', JSON.stringify(goals));
+            localStorage.setItem('recomptrack_advanced', JSON.stringify(advancedSettings));
         }
 
         function inchesToCm(inches) { return inches * 2.54; }
@@ -358,7 +427,6 @@
             document.getElementById('ffmi-progress-text').textContent = ffmiProgress.toFixed(0) + '%';
         }
 
-        // Fixed time navigation logic
         function getFilteredLogs(period, offset = 0) {
             if (!logs.length) return [];
             const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
@@ -411,55 +479,95 @@
                 ctx.style.display = 'block';
             }
 
-            const labels = filteredLogs.map(l => l.date);
+            const labels = filteredLogs.map(l => ''); // Remove dates from bottom
             const weights = filteredLogs.map(l => l.weight);
             const bfs = filteredLogs.map(l => parseFloat(l.bf));
             const ffmis = filteredLogs.map(l => calculateFFMI(l.weight, l.bf) || null);
 
+            const datasets = [
+                {
+                    label: 'Weight (lbs)',
+                    data: weights,
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    yAxisID: 'y',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                },
+                {
+                    label: 'Body Fat %',
+                    data: bfs,
+                    borderColor: '#f59e0b',
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                    pointRadius: 2,
+                    pointHoverRadius: 4
+                }
+            ];
+
+            // Add Weight Goal Line if enabled
+            if (advancedSettings.showWeightGoal && goals.targetWeight) {
+                const goalLine = new Array(weights.length).fill(goals.targetWeight);
+                datasets.push({
+                    label: 'Weight Goal',
+                    data: goalLine,
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    tension: 0,
+                    yAxisID: 'y',
+                    pointRadius: 0,
+                    pointHoverRadius: 0
+                });
+            }
+
             chartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Weight (lbs)', data: weights, borderColor: '#10b981', borderWidth: 2.5, tension: 0.3, yAxisID: 'y' },
-                        { label: 'Body Fat %', data: bfs, borderColor: '#f59e0b', borderWidth: 2.5, tension: 0.3, yAxisID: 'y1' },
-                        { label: 'FFMI', data: ffmis, borderColor: '#38bdf8', borderWidth: 2.5, tension: 0.3, yAxisID: 'y2' }
-                    ]
-                },
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 10 } } },
-                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 10 } } },
-                        y2: { display: false }
+                        x: {
+                            grid: { color: '#27272a', drawBorder: false },
+                            ticks: { display: false } // Remove dates
+                        },
+                        y: { 
+                            position: 'left', 
+                            grid: { color: '#27272a' }, 
+                            ticks: { color: '#71717a', font: { size: 11 } } 
+                        },
+                        y1: { 
+                            position: 'right', 
+                            grid: { drawOnChartArea: false }, 
+                            ticks: { color: '#71717a', font: { size: 11 } } 
+                        }
                     },
-                    plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } }
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'top', 
+                            labels: { boxWidth: 12, font: { size: 11 }, padding: 15 } 
+                        } 
+                    }
                 }
             });
         }
 
-        // Fixed shiftPeriod function
         function shiftPeriod(direction) {
-            // direction = -1 → Previous (go further back in time)
-            // direction = +1 → Next (move toward most recent data)
-
             if (direction > 0) {
-                // Next button - move toward present
-                if (currentOffset > 0) {
-                    currentOffset--;
-                }
+                if (currentOffset > 0) currentOffset--;
             } else {
-                // Previous button - go further into the past
                 currentOffset++;
             }
-
             updateChart(currentFilter);
         }
 
         function filterChart(period) {
-            currentOffset = 0; // Always reset to most recent when changing period type
+            currentOffset = 0;
             updateChart(period);
         }
 
@@ -584,6 +692,34 @@
             hideProfileModal();
             updateFFMITooltip();
             updateDashboard();
+        }
+
+        function showAdvancedSettings() {
+            document.getElementById('show-weight-goal').checked = advancedSettings.showWeightGoal;
+            document.getElementById('show-normality-zone').checked = advancedSettings.showNormalityZone;
+            document.getElementById('normality-min').value = advancedSettings.normalityMin;
+            document.getElementById('normality-max').value = advancedSettings.normalityMax;
+            document.getElementById('weight-goal-value').value = advancedSettings.weightGoal || goals.targetWeight || 125;
+            
+            document.getElementById('advanced-modal').classList.remove('hidden');
+            document.getElementById('advanced-modal').classList.add('flex');
+        }
+
+        function hideAdvancedSettings() {
+            document.getElementById('advanced-modal').classList.add('hidden');
+            document.getElementById('advanced-modal').classList.remove('flex');
+        }
+
+        function applyAdvancedSettings() {
+            advancedSettings.showWeightGoal = document.getElementById('show-weight-goal').checked;
+            advancedSettings.showNormalityZone = document.getElementById('show-normality-zone').checked;
+            advancedSettings.normalityMin = parseFloat(document.getElementById('normality-min').value) || 115;
+            advancedSettings.normalityMax = parseFloat(document.getElementById('normality-max').value) || 140;
+            advancedSettings.weightGoal = parseFloat(document.getElementById('weight-goal-value').value) || 125;
+
+            saveData();
+            hideAdvancedSettings();
+            updateChart(currentFilter);
         }
 
         function clearData() {
