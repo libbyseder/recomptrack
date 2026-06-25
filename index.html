@@ -128,20 +128,41 @@
                 <div class="font-semibold text-xl">Advanced Settings</div>
                 <button onclick="hideAdvancedSettings()" class="text-xl">×</button>
             </div>
-            <div class="space-y-4">
+
+            <div class="space-y-5">
+                <div class="text-sm font-semibold text-zinc-400 mb-2">Show on Chart</div>
+                
                 <div class="flex items-center justify-between">
-                    <span>Show Weight Goal Line</span>
-                    <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
+                    <span>Weight</span>
+                    <input type="checkbox" id="toggle-weight" checked class="w-5 h-5 accent-emerald-500">
                 </div>
                 <div class="flex items-center justify-between">
-                    <span>Show Body Fat Goal Line</span>
-                    <input type="checkbox" id="show-bf-goal" checked class="w-5 h-5 accent-emerald-500">
+                    <span>Body Fat %</span>
+                    <input type="checkbox" id="toggle-bf" checked class="w-5 h-5 accent-emerald-500">
                 </div>
                 <div class="flex items-center justify-between">
-                    <span>Show FFMI Goal Line</span>
-                    <input type="checkbox" id="show-ffmi-goal" checked class="w-5 h-5 accent-emerald-500">
+                    <span>FFMI</span>
+                    <input type="checkbox" id="toggle-ffmi" checked class="w-5 h-5 accent-emerald-500">
+                </div>
+
+                <div class="pt-4 border-t border-zinc-700">
+                    <div class="text-sm font-semibold text-zinc-400 mb-2">Goal Lines</div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span>Weight Goal</span>
+                        <input type="checkbox" id="show-weight-goal" checked class="w-5 h-5 accent-emerald-500">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Body Fat Goal</span>
+                        <input type="checkbox" id="show-bf-goal" checked class="w-5 h-5 accent-emerald-500">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>FFMI Goal</span>
+                        <input type="checkbox" id="show-ffmi-goal" checked class="w-5 h-5 accent-emerald-500">
+                    </div>
                 </div>
             </div>
+
             <button onclick="applyAdvancedSettings()" class="mt-6 w-full py-3 bg-emerald-500 hover:bg-emerald-600 rounded-2xl font-semibold">
                 Apply Settings
             </button>
@@ -157,6 +178,9 @@
         let currentOffset = 0;
 
         let advancedSettings = {
+            showWeight: true,
+            showBF: true,
+            showFFMI: true,
             showWeightGoal: true,
             showBFGoal: true,
             showFFMIGoal: true
@@ -221,35 +245,43 @@
             const bfs = filtered.map(l => parseFloat(l.bf));
             const ffmis = filtered.map(l => calculateFFMI(l.weight, l.bf) || null);
 
-            const datasets = [
-                {
+            const datasets = [];
+
+            if (advancedSettings.showWeight) {
+                datasets.push({
                     label: 'Weight (lbs)',
                     data: weights,
                     borderColor: '#10b981',
                     borderWidth: 3,
                     tension: 0.3,
                     yAxisID: 'y'
-                },
-                {
+                });
+            }
+
+            if (advancedSettings.showBF) {
+                datasets.push({
                     label: 'Body Fat %',
                     data: bfs,
                     borderColor: '#f59e0b',
                     borderWidth: 2.5,
                     tension: 0.3,
                     yAxisID: 'y1'
-                },
-                {
+                });
+            }
+
+            if (advancedSettings.showFFMI) {
+                datasets.push({
                     label: 'FFMI',
                     data: ffmis,
-                    borderColor: '#38bdf8',           // Same blue as before
+                    borderColor: '#38bdf8',
                     borderWidth: 2.5,
                     tension: 0.3,
                     yAxisID: 'y2'
-                }
-            ];
+                });
+            }
 
-            // Weight Goal Line (Red)
-            if (advancedSettings.showWeightGoal && goals.targetWeight) {
+            // Goal Lines
+            if (advancedSettings.showWeightGoal && goals.targetWeight && advancedSettings.showWeight) {
                 datasets.push({
                     label: 'Weight Goal',
                     data: new Array(weights.length).fill(goals.targetWeight),
@@ -262,8 +294,7 @@
                 });
             }
 
-            // BF% Goal Line (Orange)
-            if (advancedSettings.showBFGoal && goals.targetBF) {
+            if (advancedSettings.showBFGoal && goals.targetBF && advancedSettings.showBF) {
                 datasets.push({
                     label: 'BF% Goal',
                     data: new Array(bfs.length).fill(goals.targetBF),
@@ -276,12 +307,11 @@
                 });
             }
 
-            // FFMI Goal Line - FIXED: Same blue color as FFMI data
-            if (advancedSettings.showFFMIGoal && goals.targetFFMI) {
+            if (advancedSettings.showFFMIGoal && goals.targetFFMI && advancedSettings.showFFMI) {
                 datasets.push({
                     label: 'FFMI Goal',
                     data: new Array(ffmis.length).fill(goals.targetFFMI),
-                    borderColor: '#38bdf8',           // Same blue as FFMI line
+                    borderColor: '#38bdf8',
                     borderWidth: 2,
                     borderDash: [5, 5],
                     tension: 0,
@@ -298,26 +328,10 @@
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: {
-                            grid: { color: '#27272a' },
-                            ticks: { display: false }
-                        },
-                        y: { 
-                            position: 'left', 
-                            grid: { color: '#27272a' }, 
-                            ticks: { color: '#71717a', font: { size: 11 } } 
-                        },
-                        y1: { 
-                            position: 'right', 
-                            grid: { drawOnChartArea: false }, 
-                            ticks: { color: '#71717a', font: { size: 11 } } 
-                        },
-                        y2: { 
-                            display: true,                    // Show FFMI axis so scale makes sense
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#38bdf8', font: { size: 11 } }
-                        }
+                        x: { grid: { color: '#27272a' }, ticks: { display: false } },
+                        y: { position: 'left', grid: { color: '#27272a' }, ticks: { color: '#71717a', font: { size: 11 } } },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#71717a', font: { size: 11 } } },
+                        y2: { display: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#38bdf8', font: { size: 11 } } }
                     },
                     plugins: {
                         legend: { display: true, position: 'top' },
@@ -455,9 +469,13 @@
         }
 
         function showAdvancedSettings() {
+            document.getElementById('toggle-weight').checked = advancedSettings.showWeight;
+            document.getElementById('toggle-bf').checked = advancedSettings.showBF;
+            document.getElementById('toggle-ffmi').checked = advancedSettings.showFFMI;
             document.getElementById('show-weight-goal').checked = advancedSettings.showWeightGoal;
             document.getElementById('show-bf-goal').checked = advancedSettings.showBFGoal;
             document.getElementById('show-ffmi-goal').checked = advancedSettings.showFFMIGoal;
+            
             document.getElementById('advanced-modal').classList.remove('hidden');
             document.getElementById('advanced-modal').classList.add('flex');
         }
@@ -468,9 +486,13 @@
         }
 
         function applyAdvancedSettings() {
+            advancedSettings.showWeight = document.getElementById('toggle-weight').checked;
+            advancedSettings.showBF = document.getElementById('toggle-bf').checked;
+            advancedSettings.showFFMI = document.getElementById('toggle-ffmi').checked;
             advancedSettings.showWeightGoal = document.getElementById('show-weight-goal').checked;
             advancedSettings.showBFGoal = document.getElementById('show-bf-goal').checked;
             advancedSettings.showFFMIGoal = document.getElementById('show-ffmi-goal').checked;
+
             saveData();
             hideAdvancedSettings();
             updateChart(currentFilter);
